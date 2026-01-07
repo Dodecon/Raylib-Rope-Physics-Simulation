@@ -20,9 +20,9 @@ Made to be an example of a rope simulation for educational purposes or as a base
 3. Select **Debug** or **Release** and hit **F5** to build and run.
 
 ## Workflow
-- **setup your rope**: ```C++   std::vector<RopeNode> Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 100, 10, 6); ```*a rope with the first node at the position X: 600; Y: 100, first node is anchored (pinned, cant move), 100 nodes in total, the maximum distance between each node is 10 units, each node's radius is 6 units*
-- **Uptade rope physics**: ```C++  RopePhysicsSolver::UpdateRope(Rope3, 0.0083333);    ```*using 1/120 timestep or higher is recomended*
-- **Allow rope manipulation via cursor interaction**: ```C++    MoveRopeNode(Rope, mainCamera);    ```
+- **setup your rope**: ```std::vector<RopeNode> Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 100, 10, 6);```*a rope with the first node at the position X: 600; Y: 100, first node is anchored (pinned, cant move), 100 nodes in total, the maximum distance between each node is 10 units, each node's radius is 6 units*
+- **Uptade rope physics**: ```RopePhysicsSolver::UpdateRope(Rope3, 0.0083333);```*using 1/120 timestep or higher is recomended*
+- **Allow rope manipulation via cursor interaction**: ```MoveRopeNode(Rope, mainCamera);```
 
 ## Controls
 - **Left Mouse**: Drag rope nodes.
@@ -46,7 +46,6 @@ Made to be an example of a rope simulation for educational purposes or as a base
 1. Add functions to update physics and interaction across all existing ropes.
 1. Implement UI via raygui.
 1. Add dynamic rope creation at runtime
-1. 
 1. Add more types of rope constraints
 1. Add multi-threading
 1. Improve rendering
