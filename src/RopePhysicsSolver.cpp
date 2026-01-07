@@ -1,0 +1,116 @@
+﻿#include "RopePhysicsSolver.h"
+
+const float RopePhysicsSolver::g = 9.81 * 100;	// a gravity constant. multiplied by 100 since raylib uses pixel space for positions
+
+
+void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenodes, float deltaTime) {
+	for (RopeNode& ropenode : ropenodes)
+	{
+		if (ropenode.IsAnchored) {				// if the node is anchored, it doesnt move
+			ropenode.Acceleration = { 0,0 };
+		}
+		else {
+			Vector2 velocity = ropenode.Position - ropenode.OldPosition;
+			velocity = velocity * 0.9995; //small damping facor for the rope
+
+
+			ropenode.OldPosition = ropenode.Position;
+
+			Vector2 nextPosition = ropenode.Position + velocity + ropenode.Acceleration * deltaTime * deltaTime; // update node's position
+
+
+			ropenode.SetPosition(nextPosition);			// set node's position
+			ropenode.SetAcceleration(Vector2{ 0,0 });	// reset node's acceleration
+		}
+	}
+}
+
+void RopePhysicsSolver::ApplyGravity(std::vector<RopeNode>& ropenodes) {
+
+	for (RopeNode& ropenode : ropenodes)
+	{
+		ropenode.Accelerate({0, g}); // apply gravity on Y axis for all nodes
+	}
+}
+
+void RopePhysicsSolver::UpdateRope(std::vector<RopeNode>& ropenodes, float deltaTime) {
+
+	RenderNodes(ropenodes);		// UpdateRope is rope's full life cycle. use after creating the rope to update and render it
+
+	ApplyGravity(ropenodes);
+	ApplyConstraints(ropenodes, deltaTime);
+	UpdateRopeNodesPositions(ropenodes, deltaTime);
+
+
+}
+
+
+std::vector<RopeNode> RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool isFirstNodeAnchored, int nodeAmount, float RopeLengthForEach, float nodeRadiousForEach) {
+
+	std::vector<RopeNode> newRopeNodes;
+
+	// create the first node
+	newRopeNodes.emplace_back(firstNodePos, nodeRadiousForEach, RopeLengthForEach, isFirstNodeAnchored, Vector2{ 0,0 });
+
+	// create the rest and offset them by ropelength to the right
+	for (int i = 1; i < nodeAmount; i++) {
+		newRopeNodes.emplace_back(firstNodePos + Vector2{ RopeLengthForEach * i, 0}, nodeRadiousForEach, RopeLengthForEach, false, Vector2{0,0});
+	}
+
+	return newRopeNodes;
+}
+
+void RopePhysicsSolver::RenderNodes(std::vector<RopeNode>& ropenodes) {
+
+	// Draw connections between nodes
+	for (int i = 0; i < ropenodes.size() - 1; i++) {
+		DrawLineEx(ropenodes.at(i).Position,
+			ropenodes.at(i + 1).Position, 7, RED);
+	}
+
+	// draw nodes themselves
+	for (int i = 0; i < ropenodes.size(); i++) {
+		DrawCircle(ropenodes.at(i).Position.x, ropenodes.at(i).Position.y, ropenodes.at(i).Radius, GREEN);
+	}
+
+}
+
+
+void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float deltaTime) {
+
+		for (int iter = 0; iter < 5; iter++) {
+			for (int i = 0; i < ropenodes.size() - 1; i++) {
+
+				Vector2 nodeA = ropenodes[i].Position;
+				Vector2 nodeB = ropenodes[i + 1].Position;
+
+				Vector2 vec = nodeB - nodeA;  // Vector from A to B
+				float current_dist = Vector2Length(vec);
+				float target_dist = ropenodes[i].RopeLength;
+
+				// Only correct if distance is greater than target (rope is too long)
+				if (current_dist > target_dist) {
+					Vector2 dir = vec / current_dist;  // Normalized direction from A to B
+					float error = current_dist - target_dist;
+					Vector2 correction_per_node = dir * (error * 0.5f);
+
+					bool A_anchored = ropenodes[i].IsAnchored;
+					bool B_anchored = ropenodes[i + 1].IsAnchored;
+
+					if (!A_anchored && !B_anchored) {
+						// Case 1: Neither anchored - move both toward each other
+						ropenodes[i].Position = nodeA + correction_per_node;
+						ropenodes[i + 1].Position = nodeB - correction_per_node;
+					}
+					else if (A_anchored && !B_anchored) {
+						// Case 2: A anchored - move B the full error distance toward A
+						ropenodes[i + 1].Position = nodeB - dir * error;
+					}
+					else if (!A_anchored && B_anchored) {
+						// Case 3: B anchored - move A the full error distance toward B
+						ropenodes[i].Position = nodeA + dir * error;
+					}
+				}
+			}
+		}
+}
