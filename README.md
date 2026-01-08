@@ -16,12 +16,20 @@ Made to be an example of a rope simulation for educational purposes or as a base
 
 ## Installation
 1. Clone the repository.
-2. Open `RopeSim.sln` in Visual Studio 2022.
-3. Select **Debug** or **Release** and hit **F5** to build and run.
+2. Build the project
+3. Open created solution
+4. Select **Debug** or **Release** and hit **F5** to build and run.
 
 ## Workflow
 - **setup your rope**: ```std::vector<RopeNode> Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 100, 10, 6);```*a rope with the first node at the position X: 600; Y: 100, first node is anchored (pinned, cant move), 100 nodes in total, the maximum distance between each node is 10 units, each node's radius is 6 units*
+
 - **Uptade rope physics**: ```RopePhysicsSolver::UpdateRope(Rope3, 0.0083333);```*using 1/120 timestep or higher is recomended*
+
+- **Uptade rope physics**: 
+1. ```HandleRopes(mainCamera, RopePhysicsSolver::ExistingRopes); ``` *use this to handle all existing ropes*
+or this for individual ropes:
+2. ```RopePhysicsSolver::UpdateRope(Rope3, 0.0083333);```*using 1/120 timestep or higher is recomended*
+
 - **Allow rope manipulation via cursor interaction**: ```MoveRopeNode(Rope, mainCamera);```
 
 ## Controls
@@ -43,7 +51,7 @@ Made to be an example of a rope simulation for educational purposes or as a base
 
 ### TO-DO:
 1. Refactor some functions and classes.
-1. Add functions to update physics and interaction across all existing ropes.
+1. ~Add functions to update physics and interaction across all existing ropes.~
 1. Implement UI via raygui.
 1. Add dynamic rope creation at runtime
 1. Add more types of rope constraints

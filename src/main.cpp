@@ -25,6 +25,7 @@ int main()
 
 
 	// Tell the window to use vsync and work on high DPI displays
+	// SetConfigFlags(FLAG_VSYNC_HINT);
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 	SetTargetFPS(120);
 
@@ -60,13 +61,7 @@ int main()
 
 		BeginMode2D(mainCamera); // start world space drawing
 
-		MoveRopeNode(Rope1, mainCamera);
-		MoveRopeNode(Rope2, mainCamera);
-		MoveRopeNode(Rope3, mainCamera);
-
-		RopePhysicsSolver::UpdateRope(Rope1, 0.0083333);  //using fixed time step (1/120) for best simulation results
-		RopePhysicsSolver::UpdateRope(Rope2, 0.0083333);
-		RopePhysicsSolver::UpdateRope(Rope3, 0.0083333);
+		HandleRopes(mainCamera, RopePhysicsSolver::ExistingRopes); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
@@ -78,7 +73,16 @@ int main()
 
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();
+
 	return 0;
+}
+
+void HandleRopes(Camera2D& mainCamera, std::vector<std::vector<RopeNode>>& ExistingRopes) {
+
+	for (std::vector<RopeNode>& rope : ExistingRopes) {
+		MoveRopeNode(rope, mainCamera);
+		RopePhysicsSolver::UpdateRope(rope, 0.0083333);  //using fixed time step (1/120) for best simulation results
+	}
 }
 
 void DrawFixedBackground(Texture2D background, int screenWidth, int screenHeight) {

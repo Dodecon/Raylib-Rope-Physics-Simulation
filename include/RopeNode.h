@@ -5,7 +5,6 @@ class RopeNode
 {
 	public:
 		RopeNode(Vector2 position, float radius, float ropeLength, bool isAnchored, Vector2 initialAcceleration); // constructor
-
 		
 		Vector2 Position;
 		Vector2 OldPosition;

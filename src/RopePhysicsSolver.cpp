@@ -1,9 +1,10 @@
 ﻿#include "RopePhysicsSolver.h"
 
 const float RopePhysicsSolver::g = 9.81 * 100;	// a gravity constant. multiplied by 100 since raylib uses pixel space for positions
+std::vector<std::vector<RopeNode>> RopePhysicsSolver::ExistingRopes; // A list to track all existing ropes
 
 
-void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenodes, float deltaTime) {
+void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenodes, float deltaTime) {	// Physics for the nodes using Verlet integration
 	for (RopeNode& ropenode : ropenodes)
 	{
 		if (ropenode.IsAnchored) {				// if the node is anchored, it doesnt move
@@ -25,7 +26,7 @@ void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenode
 	}
 }
 
-void RopePhysicsSolver::ApplyGravity(std::vector<RopeNode>& ropenodes) {
+void RopePhysicsSolver::ApplyForces(std::vector<RopeNode>& ropenodes) {
 
 	for (RopeNode& ropenode : ropenodes)
 	{
@@ -37,7 +38,7 @@ void RopePhysicsSolver::UpdateRope(std::vector<RopeNode>& ropenodes, float delta
 
 	RenderNodes(ropenodes);		// UpdateRope is rope's full life cycle. use after creating the rope to update and render it
 
-	ApplyGravity(ropenodes);
+	ApplyForces(ropenodes);
 	ApplyConstraints(ropenodes, deltaTime);
 	UpdateRopeNodesPositions(ropenodes, deltaTime);
 
@@ -56,6 +57,9 @@ std::vector<RopeNode> RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool is
 	for (int i = 1; i < nodeAmount; i++) {
 		newRopeNodes.emplace_back(firstNodePos + Vector2{ RopeLengthForEach * i, 0}, nodeRadiousForEach, RopeLengthForEach, false, Vector2{0,0});
 	}
+
+
+	ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes
 
 	return newRopeNodes;
 }
@@ -99,16 +103,16 @@ void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float
 
 					if (!A_anchored && !B_anchored) {
 						// Case 1: Neither anchored - move both toward each other
-						ropenodes[i].Position = nodeA + correction_per_node;
-						ropenodes[i + 1].Position = nodeB - correction_per_node;
+						ropenodes[i].SetPosition(nodeA + correction_per_node);
+						ropenodes[i + 1].SetPosition(nodeB - correction_per_node);
 					}
 					else if (A_anchored && !B_anchored) {
 						// Case 2: A anchored - move B the full error distance toward A
-						ropenodes[i + 1].Position = nodeB - dir * error;
+						ropenodes[i + 1].SetPosition(nodeB - dir * error);
 					}
 					else if (!A_anchored && B_anchored) {
 						// Case 3: B anchored - move A the full error distance toward B
-						ropenodes[i].Position = nodeA + dir * error;
+						ropenodes[i].SetPosition (nodeA + dir * error);
 					}
 				}
 			}
