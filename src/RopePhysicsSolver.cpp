@@ -118,3 +118,58 @@ void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float
 			}
 		}
 }
+
+
+void RopePhysicsSolver::HandleRopes(Camera2D& mainCamera, std::vector<std::vector<RopeNode>>& ExistingRopes) {
+
+	for (std::vector<RopeNode>& rope : ExistingRopes) {
+		MoveRopeNode(rope, mainCamera);
+		RopePhysicsSolver::UpdateRope(rope, 0.0083333);  //using fixed time step (1/120) for best simulation results
+	}
+}
+
+
+// Static variables to keep state between frames
+static RopeNode* draggedNode = nullptr;
+static bool wasAnchored = false;
+//detect overlap of a ropenode with the cursor while the LMB is held, then moves the node to the cursors position
+void RopePhysicsSolver::MoveRopeNode(std::vector<RopeNode>& ropenodes, const Camera2D& mainCamera) {
+
+	Vector2 cursorWorldPos = GetScreenToWorld2D(GetMousePosition(), mainCamera);
+
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+
+		if (draggedNode == nullptr) {
+			for (RopeNode& ropenode : ropenodes) { //bruteforce. for every node in a rope, check overlap between the cursor and a node
+				// until we find the one that overlaps
+
+				if (Vector2Distance(cursorWorldPos, ropenode.Position) < ropenode.Radius) {
+					draggedNode = &ropenode;	//found the node
+
+					wasAnchored = draggedNode->IsAnchored;	//check if it was anchored to return to this state after LMB is no longer being held
+				}
+
+			}
+		}
+
+		if (draggedNode != nullptr) {	//if we've found the node, set it as anchored and change position to the cursor's position
+			draggedNode->IsAnchored = true;
+			draggedNode->SetPosition(cursorWorldPos);
+			draggedNode->OldPosition = cursorWorldPos;
+		}
+	}
+
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+
+		if (draggedNode != nullptr) {	//dispose the pointer and release the node
+
+			if (wasAnchored) {
+				draggedNode->IsAnchored = true;
+			}
+			else {
+				draggedNode->IsAnchored = false;
+			}
+			draggedNode = nullptr;
+		}
+	}
+}

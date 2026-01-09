@@ -1,13 +1,14 @@
 
 #include "raylib.h"
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 #include <vector>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 #include "main.h"
 #include "Vector2_Operators.h"
 #include "RopeNode.h"
 #include "RopePhysicsSolver.h"
-
-
 
 
 int main()
@@ -61,7 +62,7 @@ int main()
 
 		BeginMode2D(mainCamera); // start world space drawing
 
-		HandleRopes(mainCamera, RopePhysicsSolver::ExistingRopes); //render all ropes and calculate physics
+		RopePhysicsSolver::HandleRopes(mainCamera, RopePhysicsSolver::ExistingRopes); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
@@ -77,13 +78,6 @@ int main()
 	return 0;
 }
 
-void HandleRopes(Camera2D& mainCamera, std::vector<std::vector<RopeNode>>& ExistingRopes) {
-
-	for (std::vector<RopeNode>& rope : ExistingRopes) {
-		MoveRopeNode(rope, mainCamera);
-		RopePhysicsSolver::UpdateRope(rope, 0.0083333);  //using fixed time step (1/120) for best simulation results
-	}
-}
 
 void DrawFixedBackground(Texture2D background, int screenWidth, int screenHeight) {
 	// Calculate scale to fill screen while maintaining aspect ratio
