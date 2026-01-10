@@ -1,8 +1,5 @@
 
 #include "raylib.h"
-
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
 #include <vector>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 #include "main.h"
@@ -10,11 +7,13 @@
 #include "RopeNode.h"
 #include "RopePhysicsSolver.h"
 
+#include "GUI_Renderer.h"
+
 
 int main()
 {
-	int ResolutionX = 1200;
-	int ResolutionY = 800;
+	int DefaultResolutionX = 1200;
+	int DefaultResolutionY = 700;
 
 
 	Camera2D mainCamera = { 0 }; // Camera setup
@@ -28,17 +27,22 @@ int main()
 	// Tell the window to use vsync and work on high DPI displays
 	// SetConfigFlags(FLAG_VSYNC_HINT);
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	SetTargetFPS(120);
 
 	// Enable 4x MSAA anti-aliasing
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	// Create the window and OpenGL context
-	InitWindow(ResolutionX, ResolutionY, "Rope Simulation");
+	InitWindow(DefaultResolutionX, DefaultResolutionY, "Rope Simulation");
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
 
 	//load the background image
 	Texture2D background = LoadTexture("Background_for_RopeSim.png");
+	
+	// Set Raygui style
+	GuiLoadStyle("style_jungle.rgs");
 
 
 
@@ -48,17 +52,15 @@ int main()
 
 		CameraMove(mainCamera);
 
-
-
 		// drawing
 		BeginDrawing();
 		// Setup the back buffer for drawing (clear color and depth buffers)
 		ClearBackground(RAYWHITE);
-		//draw the static background
-		DrawFixedBackground(background, ResolutionX, ResolutionY);
 
-		// draw fps at the top left corner of the screen
-		DrawFPS(20, 30);
+
+		//draw the static background
+		DrawFixedBackground(background, GetScreenWidth(), GetScreenHeight());
+
 
 		BeginMode2D(mainCamera); // start world space drawing
 
@@ -66,6 +68,10 @@ int main()
 
 
 		EndMode2D(); // end world space drawing
+
+		// draw fps at the top left corner of the screen
+		DrawFPS(45, 30);
+		GUI_Renderer::Render_GUI();
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();

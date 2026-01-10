@@ -82,7 +82,7 @@ void RopePhysicsSolver::RenderNodes(std::vector<RopeNode>& ropenodes) {
 
 void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float deltaTime) {
 
-		for (int iter = 0; iter < 5; iter++) {
+		for (int iter = 0; iter < 10; iter++) {
 			for (int i = 0; i < ropenodes.size() - 1; i++) {
 
 				Vector2 nodeA = ropenodes[i].Position;
