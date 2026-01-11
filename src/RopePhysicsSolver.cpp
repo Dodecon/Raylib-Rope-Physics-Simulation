@@ -36,11 +36,12 @@ void RopePhysicsSolver::ApplyForces(std::vector<RopeNode>& ropenodes) {
 
 void RopePhysicsSolver::UpdateRope(std::vector<RopeNode>& ropenodes, float deltaTime) {
 
-	RenderNodes(ropenodes);		// UpdateRope is rope's full life cycle. use after creating the rope to update and render it
+	// UpdateRope is rope's full life cycle. use after creating the rope to update and render it
 
 	ApplyForces(ropenodes);
-	ApplyConstraints(ropenodes, deltaTime);
 	UpdateRopeNodesPositions(ropenodes, deltaTime);
+	ApplyConstraints(ropenodes, deltaTime);
+	RenderNodes(ropenodes);
 
 
 }

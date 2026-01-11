@@ -18,12 +18,12 @@ private:
     /// <summary>
     /// convert relative vec2 (range: 0-1) to a screen position vec2
     /// </summary>
-    static Vector2 RelativeToScreen(Vector2 RelativePos, Rectangle ParentBounds = { 0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())});
+    static Vector2 RelativeToScreen(Vector2 RelativePos);
 
     /// <summary>
-    /// pass relative bounds (range: 0-1) and get screen position bounds
+    /// pass relative bounds (range: 0-1) and a Parent (pixel coords) and get screen position bounds
     /// </summary>
-    static Rectangle SetBoundsRelative(float xPos, float yPos, float length, float height, Rectangle ParentBounds = { 0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) });
+    static Rectangle SetBoundsRelative(float xPos, float yPos, float length, float height, Rectangle Parent = { 0,0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight()) });
 
     static bool RenderPanel(float xPos, float yPos, float length, float height);
 };
