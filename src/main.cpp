@@ -3,7 +3,6 @@
 #include <vector>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 #include "main.h"
-#include "Vector2_Operators.h"
 #include "RopeNode.h"
 #include "RopePhysicsSolver.h"
 
@@ -43,7 +42,7 @@ int main()
 	
 	// Set Raygui style
 	GuiLoadStyle("style_jungle.rgs");
-
+	GuiSetFont(LoadFontEx("Jersey10-Regular.ttf", 128, 0, 0));
 
 
 	// game loop

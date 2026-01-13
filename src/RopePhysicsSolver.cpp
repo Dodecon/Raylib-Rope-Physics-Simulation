@@ -1,6 +1,6 @@
 ﻿#include "RopePhysicsSolver.h"
 
-const float RopePhysicsSolver::g = 9.81 * 100;	// a gravity constant. multiplied by 100 since raylib uses pixel space for positions
+Vector2 RopePhysicsSolver::g = {0, 9.81 * 100 };	// a gravity coef. multiplied by 100 since raylib uses pixel space for positions
 std::vector<std::vector<RopeNode>> RopePhysicsSolver::ExistingRopes; // A list to track all existing ropes
 
 
@@ -30,7 +30,7 @@ void RopePhysicsSolver::ApplyForces(std::vector<RopeNode>& ropenodes) {
 
 	for (RopeNode& ropenode : ropenodes)
 	{
-		ropenode.Accelerate({0, g}); // apply gravity on Y axis for all nodes
+		ropenode.Accelerate(g); // apply gravity for all nodes
 	}
 }
 

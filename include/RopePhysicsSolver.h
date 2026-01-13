@@ -3,12 +3,11 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "RopeNode.h"
-#include "Vector2_Operators.h"
 
 class RopePhysicsSolver
 {
 	public:
-
+	static Vector2 g;
 
 	static std::vector<RopeNode> SetupRope(Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadious);
 	static void UpdateRope(std::vector<RopeNode>& ropenodes, float deltatime);
@@ -20,8 +19,6 @@ class RopePhysicsSolver
 
 	private:
 		RopePhysicsSolver() = default;
-
-		static const float g;
 
 		static void UpdateRopeNodesPositions(std::vector<RopeNode>& ropenodes, float deltaTime);
 		static void ApplyForces(std::vector<RopeNode>& ropenodes);
