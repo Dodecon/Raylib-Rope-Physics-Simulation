@@ -20,7 +20,7 @@ Vector2 GUI_Renderer::RelativeToScreen(Vector2 RelativePos) {
     return {RelativePos.x * GetScreenWidth(), RelativePos.y * GetScreenHeight()};
 }
 
-// Calculate relative position by linearly interpolating between Parent Bounds (the screen by default)
+// Calculate relative position to the Parent Bounds (the screen by default)
 Rectangle GUI_Renderer::SetBoundsRelative(float xPos, float yPos, float length, float height, Rectangle Parent) {   //all params are relative, except Parent
 
     Rectangle childRect;
@@ -51,15 +51,29 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
     }
 
     if (!isMinimized) {
-        Rectangle labelBounds = SetBoundsRelative(0.3, 0.05, 0.5, 0.02, PanelBounds);
+
+        GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.04 }).y);
+        Rectangle labelIsAnchored = SetBoundsRelative(0.13, 0.05, 0.8, 0.02, PanelBounds);
+        GuiLabel(labelIsAnchored, "Select the node with LMB");
+
+        Rectangle labelIsAnchored2 = SetBoundsRelative(0.21, 0.08, 0.7, 0.02, PanelBounds);
+        GuiLabel(labelIsAnchored2, "press CONTROL to");
+
+        Rectangle labelIsAnchored3 = SetBoundsRelative(0.13, 0.11, 0.9, 0.02, PanelBounds);
+        GuiLabel(labelIsAnchored3, "Anchor or Free the node");
+
+        GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.035 }).y);
+
+
+        Rectangle labelBounds = SetBoundsRelative(0.3, 0.18, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds, "Scale Gravity X");
 
 
         static float* gravityX = &RopePhysicsSolver::g.x;
-        Rectangle SliderBoundsX = SetBoundsRelative(0.36, 0.09, 0.3, 0.03, PanelBounds);
+        Rectangle SliderBoundsX = SetBoundsRelative(0.36, 0.22, 0.3, 0.03, PanelBounds);
         GuiSlider(SliderBoundsX, "-9.81 * 100", "9.81 * 100", gravityX, -9.81 * 100 * 2, 9.81 * 100 * 2);
 
-        Rectangle checkBoxZeroX = SetBoundsRelative(0.4, 0.14, 0.16, 0.05, PanelBounds);
+        Rectangle checkBoxZeroX = SetBoundsRelative(0.4, 0.27, 0.16, 0.05, PanelBounds);
 
         if (GuiButton(checkBoxZeroX, "zero")) {
             *gravityX = 0;
@@ -67,22 +81,39 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
 
 
-        Rectangle labelBounds2 = SetBoundsRelative(0.3, 0.23, 0.5, 0.02, PanelBounds);
+        Rectangle labelBounds2 = SetBoundsRelative(0.3, 0.36, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds2, "Scale Gravity Y");
 
         static float* gravityY = &RopePhysicsSolver::g.y;
-        Rectangle SliderBoundsY = SetBoundsRelative(0.36, 0.28, 0.3, 0.03, PanelBounds);
+        const float defaultGravityY = RopePhysicsSolver::g.y;
+        Rectangle SliderBoundsY = SetBoundsRelative(0.36, 0.41, 0.3, 0.03, PanelBounds);
         GuiSlider(SliderBoundsY, "-9.81 * 100", "9.81 * 200", gravityY, -9.81 * 100 * 2, 9.81 * 200);
 
-        Rectangle checkBoxZeroY = SetBoundsRelative(0.2, 0.33, 0.16, 0.05, PanelBounds);
-        Rectangle checkBoxDefault = SetBoundsRelative(0.6, 0.33, 0.25, 0.05, PanelBounds);
+        Rectangle checkBoxZeroY = SetBoundsRelative(0.2, 0.46, 0.16, 0.05, PanelBounds);
+        Rectangle checkBoxDefault = SetBoundsRelative(0.6, 0.46, 0.22, 0.05, PanelBounds);
 
         if (GuiButton(checkBoxZeroY, "zero")) {
             *gravityY = 0;
         }
 
         if (GuiButton(checkBoxDefault, "default")) {
-            *gravityY = 9.81 * 100;
+            *gravityY = defaultGravityY;
+        }
+
+
+
+        Rectangle labelBounds3 = SetBoundsRelative(0.25, 0.56, 0.5, 0.02, PanelBounds);
+        GuiLabel(labelBounds3, "Change Air Density");
+
+        static float* airDesity = &RopePhysicsSolver::airDensity;
+        const float defaultAirDesity = RopePhysicsSolver::airDensity;
+        Rectangle airDensitySliderBounds = SetBoundsRelative(0.12, 0.6, 0.7, 0.03, PanelBounds);
+        GuiSlider(airDensitySliderBounds, "0", "0.0001", airDesity, 0, 0.0001);
+
+        Rectangle checkBoxDefaultAirDensity = SetBoundsRelative(0.4, 0.65, 0.22, 0.05, PanelBounds);
+
+        if (GuiButton(checkBoxDefaultAirDensity, "default")) {
+            *airDesity = defaultAirDesity;
         }
     }
 

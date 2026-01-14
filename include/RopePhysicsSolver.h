@@ -9,6 +9,9 @@ class RopePhysicsSolver
 	public:
 	static Vector2 g;
 
+	static float airDensity;
+	static float dragCoef;
+
 	static std::vector<RopeNode> SetupRope(Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadious);
 	static void UpdateRope(std::vector<RopeNode>& ropenodes, float deltatime);
 

@@ -1,26 +1,49 @@
 ﻿#include "RopePhysicsSolver.h"
 
 Vector2 RopePhysicsSolver::g = {0, 9.81 * 100 };	// a gravity coef. multiplied by 100 since raylib uses pixel space for positions
+
+float RopePhysicsSolver::airDensity = 0.00002; //default value, may be changed via UI
+float RopePhysicsSolver::dragCoef = 0.47; //for circles
+
 std::vector<std::vector<RopeNode>> RopePhysicsSolver::ExistingRopes; // A list to track all existing ropes
 
 
 void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenodes, float deltaTime) {	// Physics for the nodes using Verlet integration
+
+	//physically based damping
+	auto dampVelocity = [](Vector2& velocity, RopeNode& ropenode, float deltaTime) {
+
+		float crossSection = 2 * ropenode.Radius;
+		float speed = Vector2Length(velocity) / deltaTime;
+
+		if (speed > 0.000001f) {
+			float dragForceMagnitude = 0.5 * airDensity * speed * speed * dragCoef * crossSection;
+
+			float dragFactor = 1 - (dragForceMagnitude * deltaTime / speed);
+
+			if (dragFactor < 0) { dragFactor = 0; }
+
+			velocity *= dragFactor;
+		}
+	};
+
 	for (RopeNode& ropenode : ropenodes)
 	{
 		if (ropenode.IsAnchored) {				// if the node is anchored, it doesnt move
 			ropenode.Acceleration = { 0,0 };
+
 		}
 		else {
-			Vector2 velocity = ropenode.Position - ropenode.OldPosition;
-			velocity = velocity * 0.9995; //small damping facor for the rope
 
+			Vector2 velocity = (ropenode.Position - ropenode.OldPosition);
+			dampVelocity(velocity, ropenode, deltaTime);
 
-			ropenode.OldPosition = ropenode.Position;
-
+			ropenode.OldPosition = ropenode.Position;	//update old position
 			Vector2 nextPosition = ropenode.Position + velocity + ropenode.Acceleration * deltaTime * deltaTime; // update node's position
 
 
-			ropenode.SetPosition(nextPosition);			// set node's position
+
+			ropenode.SetPosition(nextPosition);		// set node's position
 			ropenode.SetAcceleration(Vector2{ 0,0 });	// reset node's acceleration
 		}
 	}
@@ -59,7 +82,6 @@ std::vector<RopeNode> RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool is
 		newRopeNodes.emplace_back(firstNodePos + Vector2{ RopeLengthForEach * i, 0}, nodeRadiousForEach, RopeLengthForEach, false, Vector2{0,0});
 	}
 
-
 	ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes
 
 	return newRopeNodes;
@@ -83,7 +105,7 @@ void RopePhysicsSolver::RenderNodes(std::vector<RopeNode>& ropenodes) {
 
 void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float deltaTime) {
 
-		for (int iter = 0; iter < 10; iter++) {
+		for (int iter = 0; iter < 5; iter++) {
 			for (int i = 0; i < ropenodes.size() - 1; i++) {
 
 				Vector2 nodeA = ropenodes[i].Position;
@@ -157,6 +179,11 @@ void RopePhysicsSolver::MoveRopeNode(std::vector<RopeNode>& ropenodes, const Cam
 			draggedNode->IsAnchored = true;
 			draggedNode->SetPosition(cursorWorldPos);
 			draggedNode->OldPosition = cursorWorldPos;
+
+			if (IsKeyPressed(KEY_LEFT_CONTROL)) {	//if control is pressed, change if the node is anchored or not
+				wasAnchored = !wasAnchored;
+				draggedNode->IsAnchored = !draggedNode->IsAnchored;
+			}
 		}
 	}
 
