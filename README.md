@@ -5,7 +5,7 @@ Currently, it features Verlet integration for realistic rope movement and mouse 
 
 Made to be an example of a rope simulation for educational purposes or as a base for your own rope simuation.
 
-![Rope simulation screenshot](image-1.png)
+![Rope Physics simulation preview](image.png)
 
 ## Documentation
 - the scripts are well commented, code is written to be simple and readable, however ther is **No official documentation** beyond the source comments.
@@ -34,6 +34,7 @@ or this for individual ropes:
 
 ## Controls
 - **Left Mouse**: Drag rope nodes.
+- **CONTROL while dragging**: Anchore the ropenode.
 - **Right Mouse**: Pan the camera.
 - **Scroll Wheel**: Zoom.
 
@@ -52,7 +53,7 @@ or this for individual ropes:
 ### TO-DO:
 1. Refactor some functions and classes.
 1. ~Add functions to update physics and interaction across all existing ropes.~
-1. Implement UI via raygui.
+1. ~Implement UI via raygui.~
 1. Add dynamic rope creation at runtime
 1. Add more types of rope constraints
 1. Add multi-threading

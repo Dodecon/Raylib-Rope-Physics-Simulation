@@ -3,11 +3,10 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h" 
 
-bool GUI_Renderer::isMinimized = false;
 
 void GUI_Renderer::Render_GUI() {
 
-    RenderPanel(0.73, 0.05, 0.25, 0.9);
+    RenderPanel(0.73, 0.05, 0.25, 0.9); //create he Toolbox panel at relative to the screen position
 }
 
 
@@ -20,7 +19,6 @@ Vector2 GUI_Renderer::RelativeToScreen(Vector2 RelativePos) {
     return {RelativePos.x * GetScreenWidth(), RelativePos.y * GetScreenHeight()};
 }
 
-// Calculate relative position to the Parent Bounds (the screen by default)
 Rectangle GUI_Renderer::SetBoundsRelative(float xPos, float yPos, float length, float height, Rectangle Parent) {   //all params are relative, except Parent
 
     Rectangle childRect;
@@ -36,22 +34,42 @@ Rectangle GUI_Renderer::SetBoundsRelative(float xPos, float yPos, float length, 
     return childRect;
 }
 
+// is the panel minimized or not
+static bool isMinimized = false;
 
 bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float height) {
+
+    Vector2 mousePos = GetMousePosition();
+
+    // change font size based on the window height
     GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.035 }).y);
 
+    //setup and render the panel
     Rectangle PanelBounds = SetBoundsRelative(xPos, yPos, length, (!isMinimized? height : height / 10));
     GuiPanel(PanelBounds, "ToollBox");
         
 
-    Rectangle closeButtonBounds = SetBoundsRelative(0.92,0.001, 0.08,0, PanelBounds);
-    closeButtonBounds.height = closeButtonBounds.width;
-    if (GuiButton(closeButtonBounds, "-")) {
+    // prevent nodes from being dragged while the mouse is inside the panel
+    if (CheckCollisionPointRec(mousePos, PanelBounds)) {
+        RopePhysicsSolver::canDrag = false;
+    }
+    else {
+        RopePhysicsSolver::canDrag = true;
+    }
+
+    // setup and render Close button
+    Rectangle minimizeButtonBounds = SetBoundsRelative(0.92,0.001, 0.08,0, PanelBounds);
+    //force the button to be square
+    minimizeButtonBounds.height = minimizeButtonBounds.width;
+
+    //minimize if the button was pressed
+    if (GuiButton(minimizeButtonBounds, "-")) {
         isMinimized = !isMinimized;
     }
 
     if (!isMinimized) {
 
+        //describing what the user can do
         GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.04 }).y);
         Rectangle labelIsAnchored = SetBoundsRelative(0.13, 0.05, 0.8, 0.02, PanelBounds);
         GuiLabel(labelIsAnchored, "Select the node with LMB");
@@ -61,10 +79,12 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
         Rectangle labelIsAnchored3 = SetBoundsRelative(0.13, 0.11, 0.9, 0.02, PanelBounds);
         GuiLabel(labelIsAnchored3, "Anchor or Free the node");
+      //--------------------------------------------------------------------------------------------------------
 
+        //change the font size to the rest of the panel
         GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.035 }).y);
 
-
+        //allow gravity changes via sliders and buttons to reset values
         Rectangle labelBounds = SetBoundsRelative(0.3, 0.18, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds, "Scale Gravity X");
 
@@ -99,9 +119,9 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         if (GuiButton(checkBoxDefault, "default")) {
             *gravityY = defaultGravityY;
         }
+//-------------------------------------------------------------------------------------------------------------
 
-
-
+        //allow air density changes
         Rectangle labelBounds3 = SetBoundsRelative(0.25, 0.56, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds3, "Change Air Density");
 

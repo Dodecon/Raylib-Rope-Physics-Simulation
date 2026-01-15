@@ -154,6 +154,7 @@ void RopePhysicsSolver::HandleRopes(Camera2D& mainCamera, std::vector<std::vecto
 
 // Static variables to keep state between frames
 static RopeNode* draggedNode = nullptr;
+bool RopePhysicsSolver::canDrag = true;
 static bool wasAnchored = false;
 //detect overlap of a ropenode with the cursor while the LMB is held, then moves the node to the cursors position
 void RopePhysicsSolver::MoveRopeNode(std::vector<RopeNode>& ropenodes, const Camera2D& mainCamera) {
@@ -162,7 +163,7 @@ void RopePhysicsSolver::MoveRopeNode(std::vector<RopeNode>& ropenodes, const Cam
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
-		if (draggedNode == nullptr) {
+		if (draggedNode == nullptr && canDrag) {
 			for (RopeNode& ropenode : ropenodes) { //bruteforce. for every node in a rope, check overlap between the cursor and a node
 				// until we find the one that overlaps
 

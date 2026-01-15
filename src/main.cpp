@@ -20,7 +20,7 @@ int main()
 
 	std::vector<RopeNode> Rope1 = RopePhysicsSolver::SetupRope(Vector2{200,100}, true, 3, 100, 15);		//creating 3 example ropes
 	std::vector<RopeNode> Rope2 = RopePhysicsSolver::SetupRope(Vector2{400,100}, true, 9, 40, 10);
-	std::vector<RopeNode> Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 100, 8, 5);
+	std::vector<RopeNode> Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 50, 8, 5);
 
 
 	// Tell the window to use vsync and work on high DPI displays
