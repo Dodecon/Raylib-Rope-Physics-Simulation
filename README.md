@@ -51,7 +51,7 @@ or this for individual ropes:
 
 
 ### TO-DO:
-1. Refactor some functions and classes.
+1. ~Refactor some functions and classes.~
 1. ~Add functions to update physics and interaction across all existing ropes.~
 1. ~Implement UI via raygui.~
 1. Add dynamic rope creation at runtime

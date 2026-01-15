@@ -5,10 +5,22 @@ Vector2 RopePhysicsSolver::g = {0, 9.81 * 100 };	// a gravity coef. multiplied b
 float RopePhysicsSolver::airDensity = 0.00002; //default value, may be changed via UI
 float RopePhysicsSolver::dragCoef = 0.47; //for circles
 
-std::vector<std::vector<RopeNode>> RopePhysicsSolver::ExistingRopes; // A list to track all existing ropes
+std::vector<Rope> RopePhysicsSolver::ExistingRopes; // A list to track all existing ropes
 
 
-void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenodes, float deltaTime) {	// Physics for the nodes using Verlet integration
+//adds acceleration as a force to a rope node. for things like gravity, bounces, wind, etc.
+void RopePhysicsSolver::Accelerate(RopeNode& ropenode, Vector2 acceleration) {
+
+	if (ropenode.IsAnchored) {
+		ropenode.Acceleration = { 0,0 };
+	}
+	else {
+		ropenode.Acceleration = ropenode.Acceleration + acceleration;
+	}
+}
+
+
+void RopePhysicsSolver::UpdateRopeNodesPositions(Rope& rope, float deltaTime) {	// Physics for the nodes using Verlet integration
 
 	//physically based damping
 	auto dampVelocity = [](Vector2& velocity, RopeNode& ropenode, float deltaTime) {
@@ -27,7 +39,7 @@ void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenode
 		}
 	};
 
-	for (RopeNode& ropenode : ropenodes)
+	for (RopeNode& ropenode : rope.nodes)
 	{
 		if (ropenode.IsAnchored) {				// if the node is anchored, it doesnt move
 			ropenode.Acceleration = { 0,0 };
@@ -43,43 +55,41 @@ void RopePhysicsSolver::UpdateRopeNodesPositions(std::vector<RopeNode>& ropenode
 
 
 
-			ropenode.SetPosition(nextPosition);		// set node's position
-			ropenode.SetAcceleration(Vector2{ 0,0 });	// reset node's acceleration
+			ropenode.Position = nextPosition;		// set node's position
+			ropenode.Acceleration = { 0,0 };	// reset node's acceleration
 		}
 	}
 }
 
-void RopePhysicsSolver::ApplyForces(std::vector<RopeNode>& ropenodes) {
+void RopePhysicsSolver::ApplyForces(Rope& rope) {
 
-	for (RopeNode& ropenode : ropenodes)
+	for (RopeNode& ropenode : rope.nodes)
 	{
-		ropenode.Accelerate(g); // apply gravity for all nodes
+		Accelerate(ropenode,g); // apply gravity for all nodes
 	}
 }
 
-void RopePhysicsSolver::UpdateRope(std::vector<RopeNode>& ropenodes, float deltaTime) {
+void RopePhysicsSolver::UpdateRope(Rope& rope, float deltaTime) {
 
 	// UpdateRope is rope's full life cycle. use after creating the rope to update and render it
 
-	ApplyForces(ropenodes);
-	UpdateRopeNodesPositions(ropenodes, deltaTime);
-	ApplyConstraints(ropenodes, deltaTime);
-	RenderNodes(ropenodes);
-
-
+	ApplyForces(rope);
+	UpdateRopeNodesPositions(rope, deltaTime);
+	ApplyConstraints(rope, deltaTime);
+	RopeRenderer::RenderRope(rope);
 }
 
 
-std::vector<RopeNode> RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool isFirstNodeAnchored, int nodeAmount, float RopeLengthForEach, float nodeRadiousForEach) {
+Rope RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool isFirstNodeAnchored, int nodeAmount, float RopeLengthForEach, float nodeRadiousForEach) {
 
-	std::vector<RopeNode> newRopeNodes;
+	Rope newRopeNodes;
 
 	// create the first node
-	newRopeNodes.emplace_back(firstNodePos, nodeRadiousForEach, RopeLengthForEach, isFirstNodeAnchored, Vector2{ 0,0 });
+	newRopeNodes.nodes.emplace_back(firstNodePos, nodeRadiousForEach, RopeLengthForEach, isFirstNodeAnchored, Vector2{ 0,0 });
 
 	// create the rest and offset them by ropelength to the right
 	for (int i = 1; i < nodeAmount; i++) {
-		newRopeNodes.emplace_back(firstNodePos + Vector2{ RopeLengthForEach * i, 0}, nodeRadiousForEach, RopeLengthForEach, false, Vector2{0,0});
+		newRopeNodes.nodes.emplace_back(firstNodePos + Vector2{ RopeLengthForEach * i, 0}, nodeRadiousForEach, RopeLengthForEach, false, Vector2{0,0});
 	}
 
 	ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes
@@ -87,33 +97,18 @@ std::vector<RopeNode> RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool is
 	return newRopeNodes;
 }
 
-void RopePhysicsSolver::RenderNodes(std::vector<RopeNode>& ropenodes) {
 
-	// Draw connections between nodes
-	for (int i = 0; i < ropenodes.size() - 1; i++) {
-		DrawLineEx(ropenodes.at(i).Position,
-			ropenodes.at(i + 1).Position, 7, RED);
-	}
-
-	// draw nodes themselves
-	for (int i = 0; i < ropenodes.size(); i++) {
-		DrawCircle(ropenodes.at(i).Position.x, ropenodes.at(i).Position.y, ropenodes.at(i).Radius, GREEN);
-	}
-
-}
-
-
-void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float deltaTime) {
+void RopePhysicsSolver::ApplyConstraints(Rope& rope, float deltaTime) {
 
 		for (int iter = 0; iter < 5; iter++) {
-			for (int i = 0; i < ropenodes.size() - 1; i++) {
+			for (int i = 0; i < rope.nodes.size() - 1; i++) {
 
-				Vector2 nodeA = ropenodes[i].Position;
-				Vector2 nodeB = ropenodes[i + 1].Position;
+				Vector2 nodeA = rope.nodes[i].Position;
+				Vector2 nodeB = rope.nodes[i + 1].Position;
 
 				Vector2 vec = nodeB - nodeA;  // Vector from A to B
 				float current_dist = Vector2Length(vec);
-				float target_dist = ropenodes[i].RopeLength;
+				float target_dist = rope.nodes[i].RopeLength;
 
 				// Only correct if distance is greater than target (rope is too long)
 				if (current_dist > target_dist) {
@@ -121,21 +116,21 @@ void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float
 					float error = current_dist - target_dist;
 					Vector2 correction_per_node = dir * (error * 0.5f);
 
-					bool A_anchored = ropenodes[i].IsAnchored;
-					bool B_anchored = ropenodes[i + 1].IsAnchored;
+					bool A_anchored = rope.nodes[i].IsAnchored;
+					bool B_anchored = rope.nodes[i + 1].IsAnchored;
 
 					if (!A_anchored && !B_anchored) {
 						// Case 1: Neither anchored - move both toward each other
-						ropenodes[i].SetPosition(nodeA + correction_per_node);
-						ropenodes[i + 1].SetPosition(nodeB - correction_per_node);
+						rope.nodes[i].Position = nodeA + correction_per_node;
+						rope.nodes[i + 1].Position = nodeB - correction_per_node;
 					}
 					else if (A_anchored && !B_anchored) {
 						// Case 2: A anchored - move B the full error distance toward A
-						ropenodes[i + 1].SetPosition(nodeB - dir * error);
+						rope.nodes[i + 1].Position = nodeB - dir * error;
 					}
 					else if (!A_anchored && B_anchored) {
 						// Case 3: B anchored - move A the full error distance toward B
-						ropenodes[i].SetPosition (nodeA + dir * error);
+						rope.nodes[i].Position = nodeA + dir * error;
 					}
 				}
 			}
@@ -143,12 +138,27 @@ void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& ropenodes, float
 }
 
 
-void RopePhysicsSolver::HandleRopes(Camera2D& mainCamera, std::vector<std::vector<RopeNode>>& ExistingRopes) {
+void RopePhysicsSolver::HandleRopes(std::vector<Rope>& ExistingRopes, Camera2D& mainCamera) {
 
-	for (std::vector<RopeNode>& rope : ExistingRopes) {
+	for (Rope& rope : ExistingRopes) {
 		MoveRopeNode(rope, mainCamera);
 		RopePhysicsSolver::UpdateRope(rope, 0.0083333);  //using fixed time step (1/120) for best simulation results
 	}
+}
+
+void RopeRenderer::RenderRope(Rope& rope) {
+
+	// Draw connections between nodes
+	for (int i = 0; i < rope.nodes.size() - 1; i++) {
+		DrawLineEx(rope.nodes.at(i).Position,
+			rope.nodes.at(i + 1).Position, 7, RED);
+	}
+
+	// draw nodes themselves
+	for (int i = 0; i < rope.nodes.size(); i++) {
+		DrawCircle(rope.nodes.at(i).Position.x, rope.nodes.at(i).Position.y, rope.nodes.at(i).Radius, GREEN);
+	}
+
 }
 
 
@@ -157,14 +167,14 @@ static RopeNode* draggedNode = nullptr;
 bool RopePhysicsSolver::canDrag = true;
 static bool wasAnchored = false;
 //detect overlap of a ropenode with the cursor while the LMB is held, then moves the node to the cursors position
-void RopePhysicsSolver::MoveRopeNode(std::vector<RopeNode>& ropenodes, const Camera2D& mainCamera) {
+void RopePhysicsSolver::MoveRopeNode(Rope& rope, const Camera2D& mainCamera) {
 
 	Vector2 cursorWorldPos = GetScreenToWorld2D(GetMousePosition(), mainCamera);
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
 		if (draggedNode == nullptr && canDrag) {
-			for (RopeNode& ropenode : ropenodes) { //bruteforce. for every node in a rope, check overlap between the cursor and a node
+			for (RopeNode& ropenode : rope.nodes) { //bruteforce. for every node in a rope, check overlap between the cursor and a node
 				// until we find the one that overlaps
 
 				if (Vector2Distance(cursorWorldPos, ropenode.Position) < ropenode.Radius) {
@@ -178,7 +188,7 @@ void RopePhysicsSolver::MoveRopeNode(std::vector<RopeNode>& ropenodes, const Cam
 
 		if (draggedNode != nullptr) {	//if we've found the node, set it as anchored and change position to the cursor's position
 			draggedNode->IsAnchored = true;
-			draggedNode->SetPosition(cursorWorldPos);
+			draggedNode->Position = cursorWorldPos;
 			draggedNode->OldPosition = cursorWorldPos;
 
 			if (IsKeyPressed(KEY_LEFT_CONTROL)) {	//if control is pressed, change if the node is anchored or not

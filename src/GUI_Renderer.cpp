@@ -91,7 +91,7 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
         static float* gravityX = &RopePhysicsSolver::g.x;
         Rectangle SliderBoundsX = SetBoundsRelative(0.36, 0.22, 0.3, 0.03, PanelBounds);
-        GuiSlider(SliderBoundsX, "-9.81 * 100", "9.81 * 100", gravityX, -9.81 * 100 * 2, 9.81 * 100 * 2);
+        GuiSlider(SliderBoundsX, "-9.81 * 200", "9.81 * 200", gravityX, -9.81 * 100 * 2, 9.81 * 100 * 2);
 
         Rectangle checkBoxZeroX = SetBoundsRelative(0.4, 0.27, 0.16, 0.05, PanelBounds);
 
@@ -105,9 +105,9 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         GuiLabel(labelBounds2, "Scale Gravity Y");
 
         static float* gravityY = &RopePhysicsSolver::g.y;
-        const float defaultGravityY = RopePhysicsSolver::g.y;
+        const static float defaultGravityY = RopePhysicsSolver::g.y;
         Rectangle SliderBoundsY = SetBoundsRelative(0.36, 0.41, 0.3, 0.03, PanelBounds);
-        GuiSlider(SliderBoundsY, "-9.81 * 100", "9.81 * 200", gravityY, -9.81 * 100 * 2, 9.81 * 200);
+        GuiSlider(SliderBoundsY, "-9.81 * 200", "9.81 * 200", gravityY, -9.81 * 100 * 2, 9.81 * 200);
 
         Rectangle checkBoxZeroY = SetBoundsRelative(0.2, 0.46, 0.16, 0.05, PanelBounds);
         Rectangle checkBoxDefault = SetBoundsRelative(0.6, 0.46, 0.22, 0.05, PanelBounds);
@@ -126,9 +126,9 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         GuiLabel(labelBounds3, "Change Air Density");
 
         static float* airDesity = &RopePhysicsSolver::airDensity;
-        const float defaultAirDesity = RopePhysicsSolver::airDensity;
+        const static float defaultAirDesity = RopePhysicsSolver::airDensity;
         Rectangle airDensitySliderBounds = SetBoundsRelative(0.12, 0.6, 0.7, 0.03, PanelBounds);
-        GuiSlider(airDensitySliderBounds, "0", "0.0001", airDesity, 0, 0.0001);
+        GuiSlider(airDensitySliderBounds, "0", "0.0003", airDesity, 0, 0.0003);
 
         Rectangle checkBoxDefaultAirDensity = SetBoundsRelative(0.4, 0.65, 0.22, 0.05, PanelBounds);
 

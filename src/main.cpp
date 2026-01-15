@@ -18,9 +18,9 @@ int main()
 	Camera2D mainCamera = { 0 }; // Camera setup
 	mainCamera.zoom = 1;
 
-	std::vector<RopeNode> Rope1 = RopePhysicsSolver::SetupRope(Vector2{200,100}, true, 3, 100, 15);		//creating 3 example ropes
-	std::vector<RopeNode> Rope2 = RopePhysicsSolver::SetupRope(Vector2{400,100}, true, 9, 40, 10);
-	std::vector<RopeNode> Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 50, 8, 5);
+	Rope Rope1 = RopePhysicsSolver::SetupRope(Vector2{200,100}, true, 3, 100, 15);		//creating 3 example ropes
+	Rope Rope2 = RopePhysicsSolver::SetupRope(Vector2{400,100}, true, 9, 40, 10);
+	Rope Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 50, 8, 5);
 
 
 	// Tell the window to use vsync and work on high DPI displays
@@ -63,7 +63,7 @@ int main()
 
 		BeginMode2D(mainCamera); // start world space drawing
 
-		RopePhysicsSolver::HandleRopes(mainCamera, RopePhysicsSolver::ExistingRopes); //render all ropes and calculate physics
+		RopePhysicsSolver::HandleRopes(RopePhysicsSolver::ExistingRopes, mainCamera); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
