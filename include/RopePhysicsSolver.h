@@ -4,34 +4,31 @@
 #include "raymath.h"
 #include "RopeNode.h"
 #include "Rope.h"
+#include "PhysicsConfig.h"
 
 class RopePhysicsSolver
 {
 	public:
-	static Vector2 g;
 
-	static float airDensity;
-	static float dragCoef;
-	static bool canDrag;
+		PhysicsConfig& config;
 
+		RopePhysicsSolver(PhysicsConfig& CFG) : config(CFG) {}
+		~RopePhysicsSolver() = default;
 
-	static void RopePhysicsSolver::Accelerate(RopeNode& ropenode, Vector2 acceleration);
+	 void Accelerate(RopeNode& ropenode, Vector2 acceleration);
 
-	static Rope SetupRope(Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadious);
-	static void UpdateRope(Rope& ropenodes, float deltatime);
+	 Rope SetupRope(Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadious);
+	 void UpdateRope(Rope& ropenodes, float deltatime);
 
-	static std::vector<Rope> ExistingRopes;
-	static void HandleRopes(std::vector<Rope>& ExistingRopes, Camera2D& mainCamera);
-	static void MoveRopeNode(Rope& ropenodes, const Camera2D& mainCamera);
+	 void HandleRopes(Camera2D& mainCamera);
+	 void MoveRopeNode(Rope& ropenodes, const Camera2D& mainCamera);
 
 
 	private:
-		RopePhysicsSolver() = default;
-		~RopePhysicsSolver() = default;
 
-		static void UpdateRopeNodesPositions(Rope& ropenodes, float deltaTime);
-		static void ApplyForces(Rope& ropenodes);
-		static void ApplyConstraints(Rope& ropenodes, float deltatime);
+		 void UpdateRopeNodesPositions(Rope& ropenodes, float deltaTime);
+		 void ApplyForces(Rope& ropenodes);
+		 void ApplyConstraints(Rope& ropenodes, float deltatime);
 };
 
 class RopeRenderer

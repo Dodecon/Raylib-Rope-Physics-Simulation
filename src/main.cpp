@@ -5,6 +5,7 @@
 #include "main.h"
 #include "RopeNode.h"
 #include "RopePhysicsSolver.h"
+#include "PhysicsConfig.h"
 
 #include "GUI_Renderer.h"
 
@@ -15,12 +16,17 @@ int main()
 	int DefaultResolutionY = 700;
 
 
-	Camera2D mainCamera = { 0 }; // Camera setup
+	Camera2D mainCamera = { 0 };	// Camera setup
 	mainCamera.zoom = 1;
 
-	Rope Rope1 = RopePhysicsSolver::SetupRope(Vector2{200,100}, true, 3, 100, 15);		//creating 3 example ropes
-	Rope Rope2 = RopePhysicsSolver::SetupRope(Vector2{400,100}, true, 9, 40, 10);
-	Rope Rope3 = RopePhysicsSolver::SetupRope(Vector2{600,100}, true, 50, 8, 5);
+	PhysicsConfig DefaultConfig;	//set up config, physics, GUI rrendering
+	RopePhysicsSolver DefaultSolver(DefaultConfig);
+	GUI_Renderer GUI(DefaultConfig);
+
+
+	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 3, 100, 15);		//creating 3 example ropes
+	Rope Rope2 = DefaultSolver.SetupRope(Vector2{400,100}, true, 9, 40, 10);
+	Rope Rope3 = DefaultSolver.SetupRope(Vector2{600,100}, true, 50, 8, 5);
 
 
 	// Tell the window to use vsync and work on high DPI displays
@@ -63,14 +69,16 @@ int main()
 
 		BeginMode2D(mainCamera); // start world space drawing
 
-		RopePhysicsSolver::HandleRopes(RopePhysicsSolver::ExistingRopes, mainCamera); //render all ropes and calculate physics
+		DefaultSolver.HandleRopes(mainCamera); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
 
 		// draw fps at the top left corner of the screen
 		DrawFPS(45, 30);
-		GUI_Renderer::Render_GUI();
+
+
+		GUI.Render_GUI();
 
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();

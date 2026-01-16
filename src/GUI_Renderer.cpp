@@ -35,9 +35,8 @@ Rectangle GUI_Renderer::SetBoundsRelative(float xPos, float yPos, float length, 
 }
 
 // is the panel minimized or not
-static bool isMinimized = false;
 
-bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float height) {
+void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float height) {
 
     Vector2 mousePos = GetMousePosition();
 
@@ -51,10 +50,10 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
     // prevent nodes from being dragged while the mouse is inside the panel
     if (CheckCollisionPointRec(mousePos, PanelBounds)) {
-        RopePhysicsSolver::canDrag = false;
+        config.canDrag = false;
     }
     else {
-        RopePhysicsSolver::canDrag = true;
+        config.canDrag = true;
     }
 
     // setup and render Close button
@@ -81,7 +80,7 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         GuiLabel(labelIsAnchored3, "Anchor or Free the node");
       //--------------------------------------------------------------------------------------------------------
 
-        //change the font size to the rest of the panel
+        //change the font size back to the rest of the panel
         GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.035 }).y);
 
         //allow gravity changes via sliders and buttons to reset values
@@ -89,7 +88,7 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         GuiLabel(labelBounds, "Scale Gravity X");
 
 
-        static float* gravityX = &RopePhysicsSolver::g.x;
+        static float* gravityX = &config.g.x;
         Rectangle SliderBoundsX = SetBoundsRelative(0.36, 0.22, 0.3, 0.03, PanelBounds);
         GuiSlider(SliderBoundsX, "-9.81 * 200", "9.81 * 200", gravityX, -9.81 * 100 * 2, 9.81 * 100 * 2);
 
@@ -104,8 +103,8 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         Rectangle labelBounds2 = SetBoundsRelative(0.3, 0.36, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds2, "Scale Gravity Y");
 
-        static float* gravityY = &RopePhysicsSolver::g.y;
-        const static float defaultGravityY = RopePhysicsSolver::g.y;
+        static float* gravityY = &config.g.y;
+        const static float defaultGravityY = config.g.y;
         Rectangle SliderBoundsY = SetBoundsRelative(0.36, 0.41, 0.3, 0.03, PanelBounds);
         GuiSlider(SliderBoundsY, "-9.81 * 200", "9.81 * 200", gravityY, -9.81 * 100 * 2, 9.81 * 200);
 
@@ -125,8 +124,8 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         Rectangle labelBounds3 = SetBoundsRelative(0.25, 0.56, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds3, "Change Air Density");
 
-        static float* airDesity = &RopePhysicsSolver::airDensity;
-        const static float defaultAirDesity = RopePhysicsSolver::airDensity;
+        static float* airDesity = &config.airDensity;
+        const static float defaultAirDesity = config.airDensity;
         Rectangle airDensitySliderBounds = SetBoundsRelative(0.12, 0.6, 0.7, 0.03, PanelBounds);
         GuiSlider(airDensitySliderBounds, "0", "0.0003", airDesity, 0, 0.0003);
 
@@ -136,6 +135,4 @@ bool GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
             *airDesity = defaultAirDesity;
         }
     }
-
-    return 1;
 }

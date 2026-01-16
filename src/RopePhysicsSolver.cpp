@@ -1,13 +1,5 @@
 ﻿#include "RopePhysicsSolver.h"
 
-Vector2 RopePhysicsSolver::g = {0, 9.81 * 100 };	// a gravity coef. multiplied by 100 since raylib uses pixel space for positions
-
-float RopePhysicsSolver::airDensity = 0.00002; //default value, may be changed via UI
-float RopePhysicsSolver::dragCoef = 0.47; //for circles
-
-std::vector<Rope> RopePhysicsSolver::ExistingRopes; // A list to track all existing ropes
-
-
 //adds acceleration as a force to a rope node. for things like gravity, bounces, wind, etc.
 void RopePhysicsSolver::Accelerate(RopeNode& ropenode, Vector2 acceleration) {
 
@@ -23,13 +15,13 @@ void RopePhysicsSolver::Accelerate(RopeNode& ropenode, Vector2 acceleration) {
 void RopePhysicsSolver::UpdateRopeNodesPositions(Rope& rope, float deltaTime) {	// Physics for the nodes using Verlet integration
 
 	//physically based damping
-	auto dampVelocity = [](Vector2& velocity, RopeNode& ropenode, float deltaTime) {
+	auto dampVelocity = [this](Vector2& velocity, RopeNode& ropenode, float deltaTime) {
 
 		float crossSection = 2 * ropenode.Radius;
 		float speed = Vector2Length(velocity) / deltaTime;
 
 		if (speed > 0.000001f) {
-			float dragForceMagnitude = 0.5 * airDensity * speed * speed * dragCoef * crossSection;
+			float dragForceMagnitude = 0.5 * config.airDensity * speed * speed * config.dragCoef * crossSection;
 
 			float dragFactor = 1 - (dragForceMagnitude * deltaTime / speed);
 
@@ -65,7 +57,7 @@ void RopePhysicsSolver::ApplyForces(Rope& rope) {
 
 	for (RopeNode& ropenode : rope.nodes)
 	{
-		Accelerate(ropenode,g); // apply gravity for all nodes
+		Accelerate(ropenode, config.g); // apply gravity for all nodes
 	}
 }
 
@@ -76,7 +68,6 @@ void RopePhysicsSolver::UpdateRope(Rope& rope, float deltaTime) {
 	ApplyForces(rope);
 	UpdateRopeNodesPositions(rope, deltaTime);
 	ApplyConstraints(rope, deltaTime);
-	RopeRenderer::RenderRope(rope);
 }
 
 
@@ -92,7 +83,7 @@ Rope RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool isFirstNodeAnchored
 		newRopeNodes.nodes.emplace_back(firstNodePos + Vector2{ RopeLengthForEach * i, 0}, nodeRadiousForEach, RopeLengthForEach, false, Vector2{0,0});
 	}
 
-	ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes
+	config.ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes within this config
 
 	return newRopeNodes;
 }
@@ -138,11 +129,12 @@ void RopePhysicsSolver::ApplyConstraints(Rope& rope, float deltaTime) {
 }
 
 
-void RopePhysicsSolver::HandleRopes(std::vector<Rope>& ExistingRopes, Camera2D& mainCamera) {
+void RopePhysicsSolver::HandleRopes(Camera2D& mainCamera) {
 
-	for (Rope& rope : ExistingRopes) {
+	for (Rope& rope : config.ExistingRopes) {
 		MoveRopeNode(rope, mainCamera);
-		RopePhysicsSolver::UpdateRope(rope, 0.0083333);  //using fixed time step (1/120) for best simulation results
+		UpdateRope(rope, 0.0083333);  //using fixed time step (1/120) for best simulation results
+		RopeRenderer::RenderRope(rope);
 	}
 }
 
@@ -162,10 +154,6 @@ void RopeRenderer::RenderRope(Rope& rope) {
 }
 
 
-// Static variables to keep state between frames
-static RopeNode* draggedNode = nullptr;
-bool RopePhysicsSolver::canDrag = true;
-static bool wasAnchored = false;
 //detect overlap of a ropenode with the cursor while the LMB is held, then moves the node to the cursors position
 void RopePhysicsSolver::MoveRopeNode(Rope& rope, const Camera2D& mainCamera) {
 
@@ -173,42 +161,42 @@ void RopePhysicsSolver::MoveRopeNode(Rope& rope, const Camera2D& mainCamera) {
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
-		if (draggedNode == nullptr && canDrag) {
+		if (config.draggedNode == nullptr && config.canDrag) {
 			for (RopeNode& ropenode : rope.nodes) { //bruteforce. for every node in a rope, check overlap between the cursor and a node
 				// until we find the one that overlaps
 
 				if (Vector2Distance(cursorWorldPos, ropenode.Position) < ropenode.Radius) {
-					draggedNode = &ropenode;	//found the node
+					config.draggedNode = &ropenode;	//found the node
 
-					wasAnchored = draggedNode->IsAnchored;	//check if it was anchored to return to this state after LMB is no longer being held
+					config.wasAnchored = config.draggedNode->IsAnchored;	//check if it was anchored to return to this state after LMB is no longer being held
 				}
 
 			}
 		}
 
-		if (draggedNode != nullptr) {	//if we've found the node, set it as anchored and change position to the cursor's position
-			draggedNode->IsAnchored = true;
-			draggedNode->Position = cursorWorldPos;
-			draggedNode->OldPosition = cursorWorldPos;
+		if (config.draggedNode != nullptr) {	//if we've found the node, set it as anchored and change position to the cursor's position
+			config.draggedNode->IsAnchored = true;
+			config.draggedNode->Position = cursorWorldPos;
+			config.draggedNode->OldPosition = cursorWorldPos;
 
 			if (IsKeyPressed(KEY_LEFT_CONTROL)) {	//if control is pressed, change if the node is anchored or not
-				wasAnchored = !wasAnchored;
-				draggedNode->IsAnchored = !draggedNode->IsAnchored;
+				config.wasAnchored = !config.wasAnchored;
+				config.draggedNode->IsAnchored = !config.draggedNode->IsAnchored;
 			}
 		}
 	}
 
 	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 
-		if (draggedNode != nullptr) {	//dispose the pointer and release the node
+		if (config.draggedNode != nullptr) {	//dispose the pointer and release the node
 
-			if (wasAnchored) {
-				draggedNode->IsAnchored = true;
+			if (config.wasAnchored) {
+				config.draggedNode->IsAnchored = true;
 			}
 			else {
-				draggedNode->IsAnchored = false;
+				config.draggedNode->IsAnchored = false;
 			}
-			draggedNode = nullptr;
+			config.draggedNode = nullptr;
 		}
 	}
 }
