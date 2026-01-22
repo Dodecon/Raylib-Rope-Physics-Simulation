@@ -12,6 +12,8 @@
 
 int main()
 {
+	int TargetFPS = 60;
+
 	int DefaultResolutionX = 1200;
 	int DefaultResolutionY = 700;
 
@@ -24,9 +26,9 @@ int main()
 	GUI_Renderer GUI(DefaultConfig);
 
 
-	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 3, 100, 15);		//creating 3 example ropes
-	Rope Rope2 = DefaultSolver.SetupRope(Vector2{400,100}, true, 9, 40, 10);
-	Rope Rope3 = DefaultSolver.SetupRope(Vector2{600,100}, true, 50, 8, 5);
+	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 9, 60, 15);		//creating 3 example ropes
+	Rope Rope2 = DefaultSolver.SetupRope(Vector2{400,100}, true, 27, 22, 7);
+	Rope Rope3 = DefaultSolver.SetupRope(Vector2{600,100}, true, 70, 8, 5);
 
 
 	// Tell the window to use vsync and work on high DPI displays
@@ -34,7 +36,7 @@ int main()
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	SetTargetFPS(120);
+	SetTargetFPS(TargetFPS);
 
 	// Enable 4x MSAA anti-aliasing
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -54,7 +56,6 @@ int main()
 	// game loop
 	while (!WindowShouldClose())		// run the loop until the user presses ESCAPE or presses the Close button on the window
 	{
-
 		CameraMove(mainCamera);
 
 		// drawing
@@ -69,7 +70,9 @@ int main()
 
 		BeginMode2D(mainCamera); // start world space drawing
 
-		DefaultSolver.HandleRopes(mainCamera); //render all ropes and calculate physics
+		double frameTime = 1.0 / TargetFPS;
+
+		DefaultSolver.HandleRopes(mainCamera,8, 3, frameTime); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing

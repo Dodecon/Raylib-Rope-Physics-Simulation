@@ -20,7 +20,8 @@ struct PhysicsConfig
     // It calls the other constructor below, passing in the default values you want.
     PhysicsConfig()
         : PhysicsConfig(Vector2{ 0, 9.81 * 100 }, 0.00002f, 0.47f, true)
-    {}
+    {
+    }
 
     // 3. Parameterized Constructor
     PhysicsConfig(Vector2 G, float AirDensity, float DragCoef, bool CanDrag)
@@ -28,5 +29,6 @@ struct PhysicsConfig
         airDensity(AirDensity),
         dragCoef(DragCoef),
         canDrag(CanDrag)
-    {}
+    {
+    }
 };
