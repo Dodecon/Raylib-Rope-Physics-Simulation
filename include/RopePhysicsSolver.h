@@ -10,16 +10,16 @@ class RopePhysicsSolver
 {
 public:
 
-	PhysicsConfig& config;
+	Config& config;
 
-	RopePhysicsSolver(PhysicsConfig& CFG) : config(CFG) {}
+	RopePhysicsSolver(Config& CFG) : config(CFG) {}
 	~RopePhysicsSolver() = default;
 
 	// add acceleration to nodes as a force
 	void Accelerate(RopeNode& ropenode, Vector2 acceleration);
 
 	// set up the rope
-	Rope SetupRope(Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadious);
+	Rope SetupRope(Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadius);
 	//update a specific rope
 	void UpdateRope(Rope& rope, Camera2D& camera, int substeps, int iterations, double deltaTime);
 	//update all ropes

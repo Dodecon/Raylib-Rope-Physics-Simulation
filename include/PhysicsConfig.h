@@ -1,5 +1,7 @@
 #pragma once
 #include "raylib.h"
+#include "raymath.h"
+#include <vector>
 #include "Rope.h"
 
 struct PhysicsConfig
@@ -9,26 +11,61 @@ struct PhysicsConfig
     float airDensity;
     float dragCoef;
 
-    // variables to keep state between frames for rope interaction
-    RopeNode* draggedNode = nullptr;
-    bool wasAnchored = false;
-    bool canDrag;
 
     std::vector<Rope> ExistingRopes;
 
     // 2. Default Constructor
     // It calls the other constructor below, passing in the default values you want.
     PhysicsConfig()
-        : PhysicsConfig(Vector2{ 0, 9.81 * 100 }, 0.00002f, 0.47f, true)
+        : PhysicsConfig(Vector2{ 0, 9.81 * 100 }, 0.00002f, 0.47f)
+    {}
+
+    // 3. Parameterized Constructor
+    PhysicsConfig(Vector2 G, float AirDensity, float DragCoef)
+        : g(G),
+        airDensity(AirDensity),
+        dragCoef(DragCoef)
+    {}
+};
+
+
+struct InteractionConfig
+{
+    // Variables to keep state between frames for rope interaction
+    RopeNode* draggedNode = nullptr;
+    bool wasAnchored = false;
+    bool canDrag = true;
+
+    // 1. Default Constructor
+    // Note: Removed the semicolon and used lowercase 'true' 
+    InteractionConfig()
+        : InteractionConfig(true)
     {
     }
 
-    // 3. Parameterized Constructor
-    PhysicsConfig(Vector2 G, float AirDensity, float DragCoef, bool CanDrag)
-        : g(G),
-        airDensity(AirDensity),
-        dragCoef(DragCoef),
-        canDrag(CanDrag)
+    // 2. Parameterized Constructor
+    // Note: Parameter names (CanDrag) should match what you pass in
+    InteractionConfig(bool CanDrag)
+        : canDrag(CanDrag)
+    {}
+};
+
+struct Config
+{
+    PhysicsConfig physics;
+    InteractionConfig interaction;
+
+    // Default Constructor
+    Config()
+        : Config(Vector2{ 0, 9.81f * 100 }, 0.00002f, 0.47f, true)
+    {
+    }
+
+    // Parameterized Constructor
+    // Matches the arguments of the sub-constructors
+    Config(Vector2 G, float AirDensity, float DragCoef, bool CanDrag)
+        : physics(G, AirDensity, DragCoef), // Call PhysicsConfig constructor
+        interaction(CanDrag)// Call InteractionConfig constructor
     {
     }
 };

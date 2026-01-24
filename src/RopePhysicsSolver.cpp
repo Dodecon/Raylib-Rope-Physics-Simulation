@@ -1,5 +1,6 @@
 ﻿#include "RopePhysicsSolver.h"
 
+
 //adds acceleration as a force to a rope node. for things like gravity, bounces, wind, etc.
 void RopePhysicsSolver::Accelerate(RopeNode& ropenode, Vector2 acceleration) {
 
@@ -21,7 +22,7 @@ void RopePhysicsSolver::UpdateRopeNodesPositions(Rope& rope, double deltaTime) {
 		float speed = Vector2Length(velocity) / deltaTime;
 
 		if (speed > 0.01f) {
-			float dragForceMagnitude = 0.5 * config.airDensity * speed * speed * config.dragCoef * crossSection;
+			float dragForceMagnitude = 0.5 * config.physics.airDensity * speed * speed * config.physics.dragCoef * crossSection;
 
 			float dragFactor = 1 - (dragForceMagnitude * deltaTime / speed);
 
@@ -33,7 +34,8 @@ void RopePhysicsSolver::UpdateRopeNodesPositions(Rope& rope, double deltaTime) {
 
 	for (RopeNode& ropenode : rope.nodes)
 	{
-		if (&ropenode == config.draggedNode) { continue; }
+		//skip the node thats being dragged
+		if (&ropenode == config.interaction.draggedNode) { continue; }
 
 		if (ropenode.IsAnchored) {				// if the node is anchored, it doesnt move
 			ropenode.Acceleration = { 0,0 };
@@ -59,14 +61,13 @@ void RopePhysicsSolver::ApplyForces(Rope& rope) {
 
 	for (RopeNode& ropenode : rope.nodes)
 	{
-		Accelerate(ropenode, config.g); // apply gravity for all nodes
+		Accelerate(ropenode, config.physics.g); // apply gravity for all nodes
 	}
 }
 
 void RopePhysicsSolver::UpdateRope(Rope& rope, Camera2D& camera, int substeps, int iterations, double deltaTime) {
 
 	Vector2 dragStartFramePos = FindNodeToMove(rope, camera);
-	ToggleAnchor();
 
 	// UpdateRope is rope's full life cycle. use after creating the rope to update and render it
 	for (int i = 1; i <= substeps; i++) {
@@ -76,23 +77,25 @@ void RopePhysicsSolver::UpdateRope(Rope& rope, Camera2D& camera, int substeps, i
 		ApplyConstraints(rope, iterations);
 
 	}
+
+	ToggleAnchor();
 }
 
 
-Rope RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool isFirstNodeAnchored, int nodeAmount, float RopeLengthForEach, float nodeRadiousForEach) {
+Rope RopePhysicsSolver::SetupRope(Vector2 firstNodePos, bool isFirstNodeAnchored, int nodeAmount, float RopeLengthForEach, float nodeRadiusForEach) {
 
 	Rope newRopeNodes;
 
 	// create the first node
-	newRopeNodes.nodes.emplace_back(firstNodePos, nodeRadiousForEach, RopeLengthForEach, isFirstNodeAnchored, Vector2{ 0,0 });
+	newRopeNodes.nodes.emplace_back(firstNodePos, nodeRadiusForEach, RopeLengthForEach, isFirstNodeAnchored, Vector2{ 0,0 });
 
 	// create the rest and offset them by ropelength to the right
 	for (int i = 1; i < nodeAmount; i++) {
-		Vector2 offcet = Vector2{ RopeLengthForEach * i, 0 };
-		newRopeNodes.nodes.emplace_back(firstNodePos + offcet, nodeRadiousForEach, RopeLengthForEach, false, Vector2{ 0,0 });
+		Vector2 offset = Vector2{ RopeLengthForEach * i, 0 };
+		newRopeNodes.nodes.emplace_back(firstNodePos + offset, nodeRadiusForEach, RopeLengthForEach, false, Vector2{ 0,0 });
 	}
 
-	config.ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes within this config
+	config.physics.ExistingRopes.emplace_back(newRopeNodes); // Add this rope to a list of all existing ropes within this config
 
 	return newRopeNodes;
 }
@@ -126,6 +129,7 @@ void RopePhysicsSolver::ApplyConstraints(Rope& rope, int iterations) {
 				Vector2 correction = dir * (error * 0.5f);
 
 				// prevent acces momentum build up
+				// CURRENTLY NOT USED. change this value in 0 - 1 range to expiriment
 				float correctionCoef = 0.4f;
 
 
@@ -159,12 +163,13 @@ void RopePhysicsSolver::ApplyConstraints(Rope& rope, int iterations) {
 	}
 }
 
-
+//calculates physics and renders all the ropes in one command
 void RopePhysicsSolver::HandleRopes(Camera2D& camera, int substeps, int iterations, double deltaTime) {
 
-	for (Rope& rope : config.ExistingRopes) {
-		UpdateRope(rope, camera, substeps, iterations, deltaTime);  //using fixed time step (1/120) for best simulation results
-		RopeRenderer::RenderRope(rope);
+	for (int i = 0; i < config.physics.ExistingRopes.size(); i++) {
+
+		UpdateRope(config.physics.ExistingRopes[i], camera, substeps, iterations, deltaTime);
+		RopeRenderer::RenderRope(config.physics.ExistingRopes[i]);
 	}
 }
 
@@ -185,19 +190,19 @@ void RopeRenderer::RenderRope(Rope& rope) {
 
 
 //check overlap of a node with the mouse
-Vector2 RopePhysicsSolver::FindNodeToMove(Rope& rope, const Camera2D& mainCamera) {
+Vector2 RopePhysicsSolver::FindNodeToMove(Rope& rope, const Camera2D& Camera) {
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
-		Vector2 cursorWorldPos = GetScreenToWorld2D(GetMousePosition(), mainCamera);
+		Vector2 cursorWorldPos = GetScreenToWorld2D(GetMousePosition(), Camera);
 
-		if (config.draggedNode == nullptr && config.canDrag) {
+		if (config.interaction.draggedNode == nullptr && config.interaction.canDrag) {
 
 			for (RopeNode& ropenode : rope.nodes) { //bruteforce. for every node in a rope, check overlap between the cursor and a node
 													// until we find the one that overlaps
 				if (Vector2Distance(cursorWorldPos, ropenode.Position) < ropenode.Radius) {
-					config.draggedNode = &ropenode;	//found the node
-					config.wasAnchored = config.draggedNode->IsAnchored;	//check if it was anchored to return to this state after LMB is no longer being held
+					config.interaction.draggedNode = &ropenode;	//found the node
+					config.interaction.wasAnchored = config.interaction.draggedNode->IsAnchored;	//check if it was anchored to return to this state after LMB is no longer being held
 					break;
 				}
 
@@ -207,8 +212,8 @@ Vector2 RopePhysicsSolver::FindNodeToMove(Rope& rope, const Camera2D& mainCamera
 
 	//get the position at which the dragging will start. must call every frame
 	Vector2 dragStartFramePos = { 0,0 };
-	if (config.draggedNode != nullptr) {
-		dragStartFramePos = config.draggedNode->Position;
+	if (config.interaction.draggedNode != nullptr) {
+		dragStartFramePos = config.interaction.draggedNode->Position;
 	}
 
 	return dragStartFramePos;
@@ -216,12 +221,12 @@ Vector2 RopePhysicsSolver::FindNodeToMove(Rope& rope, const Camera2D& mainCamera
 
 void RopePhysicsSolver::ToggleAnchor()
 {
-	if (config.draggedNode != nullptr) {
+	if (config.interaction.draggedNode != nullptr) {
 
 		if (IsKeyPressed(KEY_LEFT_CONTROL)) {	//if control is pressed, change if the node is anchored or not
 
-			config.wasAnchored = !config.wasAnchored;
-			config.draggedNode->IsAnchored = !config.draggedNode->IsAnchored;
+			config.interaction.wasAnchored = !config.interaction.wasAnchored;
+			config.interaction.draggedNode->IsAnchored = !config.interaction.draggedNode->IsAnchored;
 		}
 	}
 }
@@ -233,9 +238,17 @@ void RopePhysicsSolver::MoveRopeNode(Rope& rope, const Camera2D& mainCamera, int
 
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
-		if (config.draggedNode != nullptr) {	//if we've found the node, set it as anchored and change position to the cursor's position
-			config.draggedNode->IsAnchored = true;
+		if (config.interaction.draggedNode == nullptr) return;
 
+		// POINTER RANGE CHECK:
+		// Check if the address of draggedNode is within the memory bounds of this rope's vector
+		const RopeNode* firstNode = &rope.nodes.front();
+		const RopeNode* lastNode = &rope.nodes.back();
+
+		if (config.interaction.draggedNode < firstNode || config.interaction.draggedNode > lastNode) {
+			return; // This node belongs to a different rope; exit this function
+		}
+		config.interaction.draggedNode->IsAnchored = true;
 
 			Vector2 dir = cursorWorldPos - dragStartFramePos;
 			float length = Vector2Length(dir);
@@ -244,28 +257,27 @@ void RopePhysicsSolver::MoveRopeNode(Rope& rope, const Camera2D& mainCamera, int
 
 				dir = dir / length;
 
-				//interpolate the potition over all sub-steps. mult by 5 for smoother movement
-				config.draggedNode->Position = dragStartFramePos + dir * (float)i / ((float)substeps * 5.0f) * length;
-				config.draggedNode->OldPosition = dragStartFramePos + dir * (float)i / ((float)substeps * 5.0f) * length;
+				//interpolate the position over all sub-steps
+				config.interaction.draggedNode->Position = dragStartFramePos + dir * (float)i / ((float)substeps) * length;
+				config.interaction.draggedNode->OldPosition = dragStartFramePos + dir * (float)i / ((float)substeps) * length;
 
 			}
 
-		}
 	}
 
 	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 
-		if (config.draggedNode != nullptr) {	//dispose the pointer and release the node
+		if (config.interaction.draggedNode != nullptr) {	//dispose the pointer and release the node
 
-			if (config.wasAnchored) {
+			if (config.interaction.wasAnchored) {
 
-				config.draggedNode->IsAnchored = true;
+				config.interaction.draggedNode->IsAnchored = true;
 			}
 			else {
 
-				config.draggedNode->IsAnchored = false;
+				config.interaction.draggedNode->IsAnchored = false;
 			}
-			config.draggedNode = nullptr;
+			config.interaction.draggedNode = nullptr;
 		}
 	}
 }

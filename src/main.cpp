@@ -21,12 +21,13 @@ int main()
 	Camera2D mainCamera = { 0 };	// Camera setup
 	mainCamera.zoom = 1;
 
-	PhysicsConfig DefaultConfig;	//set up config, physics, GUI rrendering
+	Config DefaultConfig;	//set up config, physics, GUI rrendering
+	InteractionConfig DefaultInteractionCFG;
 	RopePhysicsSolver DefaultSolver(DefaultConfig);
 	GUI_Renderer GUI(DefaultConfig);
 
 
-	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 9, 60, 15);		//creating 3 example ropes
+	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 9, 40, 10);		//creating 3 example ropes
 	Rope Rope2 = DefaultSolver.SetupRope(Vector2{400,100}, true, 27, 22, 7);
 	Rope Rope3 = DefaultSolver.SetupRope(Vector2{600,100}, true, 70, 8, 5);
 
@@ -72,14 +73,10 @@ int main()
 
 		double frameTime = 1.0 / TargetFPS;
 
-		DefaultSolver.HandleRopes(mainCamera,8, 3, frameTime); //render all ropes and calculate physics
+		DefaultSolver.HandleRopes(mainCamera,6, 4, frameTime); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
-
-		// draw fps at the top left corner of the screen
-		DrawFPS(45, 30);
-
 
 		GUI.Render_GUI();
 

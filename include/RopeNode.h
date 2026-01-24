@@ -17,6 +17,7 @@ struct RopeNode
 			}
 
 		};
+		~RopeNode() = default;
 		
 		Vector2 Position;
 		Vector2 OldPosition;

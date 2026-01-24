@@ -12,10 +12,10 @@ public:
 /// </summary>
     void Render_GUI();
 
-    PhysicsConfig& config;
+    Config& config;
     bool isMinimized = false;
 
-    GUI_Renderer(PhysicsConfig& CFG) : config(CFG) {};   //constructor
+    GUI_Renderer(Config& CFG) : config(CFG) {};   //constructor
 private:
 
 /// <summary>

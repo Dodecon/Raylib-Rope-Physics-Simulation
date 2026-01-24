@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include "RopeNode.h"
+
+// simply stores all nodes of a rope in one object (and metadata in the future)
 struct Rope
 {
 	public:

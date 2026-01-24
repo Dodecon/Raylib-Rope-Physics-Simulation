@@ -6,6 +6,9 @@
 
 void GUI_Renderer::Render_GUI() {
 
+    // draw fps at the top left corner of the screen
+    DrawFPS(RelativeToScreen({ 0.02f, 0 }).x, RelativeToScreen({ 0, 0.01 }).y);
+
     RenderPanel(0.73, 0.05, 0.25, 0.9); //create he Toolbox panel at relative to the screen position
 }
 
@@ -50,10 +53,10 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
     // prevent nodes from being dragged while the mouse is inside the panel
     if (CheckCollisionPointRec(mousePos, PanelBounds)) {
-        config.canDrag = false;
+        config.interaction.canDrag = false;
     }
     else {
-        config.canDrag = true;
+        config.interaction.canDrag = true;
     }
 
     // setup and render Close button
@@ -83,15 +86,17 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         //change the font size back to the rest of the panel
         GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.035 }).y);
 
-        //allow gravity changes via sliders and buttons to reset values
+        //allow gravity X changes via sliders and buttons to reset values
         Rectangle labelBounds = SetBoundsRelative(0.3, 0.18, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds, "Scale Gravity X");
 
-
-        static float* gravityX = &config.g.x;
+        //get the gravity X from config
+        static float* gravityX = &config.physics.g.x;
+        //change gravity X via slider
         Rectangle SliderBoundsX = SetBoundsRelative(0.36, 0.22, 0.3, 0.03, PanelBounds);
         GuiSlider(SliderBoundsX, "-9.81 * 200", "9.81 * 200", gravityX, -9.81 * 100 * 2, 9.81 * 100 * 2);
 
+        //checkbo to set the gravity to zero
         Rectangle checkBoxZeroX = SetBoundsRelative(0.4, 0.27, 0.16, 0.05, PanelBounds);
 
         if (GuiButton(checkBoxZeroX, "zero")) {
@@ -99,15 +104,18 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         }
 
 
-
+        ////allow gravity Y changes via sliders and buttons to reset values
         Rectangle labelBounds2 = SetBoundsRelative(0.3, 0.36, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds2, "Scale Gravity Y");
 
-        static float* gravityY = &config.g.y;
-        const static float defaultGravityY = config.g.y;
+        //get the gravity X from config
+        static float* gravityY = &config.physics.g.y;
+        const static float defaultGravityY = config.physics.g.y;
+        //change gravity Y via slider
         Rectangle SliderBoundsY = SetBoundsRelative(0.36, 0.41, 0.3, 0.03, PanelBounds);
-        GuiSlider(SliderBoundsY, "-9.81 * 200", "9.81 * 200", gravityY, -9.81 * 100 * 2, 9.81 * 200);
+        GuiSlider(SliderBoundsY, "-9.81 * 200", "9.81 * 200", gravityY, -defaultGravityY * 2, defaultGravityY * 2);
 
+        //checkbo to set the gravity to zero and the default value
         Rectangle checkBoxZeroY = SetBoundsRelative(0.2, 0.46, 0.16, 0.05, PanelBounds);
         Rectangle checkBoxDefault = SetBoundsRelative(0.6, 0.46, 0.22, 0.05, PanelBounds);
 
@@ -124,11 +132,15 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         Rectangle labelBounds3 = SetBoundsRelative(0.25, 0.56, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds3, "Change Air Density");
 
-        static float* airDesity = &config.airDensity;
-        const static float defaultAirDesity = config.airDensity;
+        //get air density from config
+        static float* airDesity = &config.physics.airDensity;
+        const static float defaultAirDesity = config.physics.airDensity;
+
+        //slider to change density
         Rectangle airDensitySliderBounds = SetBoundsRelative(0.12, 0.6, 0.7, 0.03, PanelBounds);
         GuiSlider(airDensitySliderBounds, "0", "0.0003", airDesity, 0, 0.0003);
 
+        //checkBox to check the style
         Rectangle checkBoxDefaultAirDensity = SetBoundsRelative(0.4, 0.65, 0.22, 0.05, PanelBounds);
 
         if (GuiButton(checkBoxDefaultAirDensity, "default")) {
