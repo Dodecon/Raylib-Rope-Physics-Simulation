@@ -119,7 +119,7 @@ void RopePhysicsSolver::ApplyConstraints(Rope& rope, int iterations) {
 
 
 			// Only correct if distance is greater than target (rope is too long)
-			if (currentDist > targetDist) [[likely]]{
+			if (currentDist > targetDist) [[likely]] {
 
 				// prevent division by zero
 				if (currentDist == 0) { currentDist = 0.001f; }
@@ -129,11 +129,10 @@ void RopePhysicsSolver::ApplyConstraints(Rope& rope, int iterations) {
 				Vector2 correction = dir * (error * 0.5f);
 
 				// prevent acces momentum build up
-				// CURRENTLY NOT USED. change this value in 0 - 1 range to expiriment
-				float correctionCoef = 0.4f;
+				float correctionCoef = Clamp(targetDist / currentDist * 0.5f, 0, 0.5f);
 
 
-				if (!nodeA.IsAnchored && !nodeB.IsAnchored)[[likely]] {
+				if (!nodeA.IsAnchored && !nodeB.IsAnchored) [[likely]] {
 					// Case 1: Neither anchored - move both toward each other
 					nodeA.Position += correction;
 					nodeB.Position -= correction;
@@ -153,7 +152,7 @@ void RopePhysicsSolver::ApplyConstraints(Rope& rope, int iterations) {
 				else if (!nodeA.IsAnchored && nodeB.IsAnchored) {
 					// Case 3: B anchored - move A the full error distance toward B
 					nodeA.Position += dir * error;
-					
+
 					nodeA.OldPosition += dir * error * correctionCoef;
 				}
 

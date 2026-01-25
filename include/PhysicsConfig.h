@@ -52,20 +52,25 @@ struct InteractionConfig
 
 struct Config
 {
+    //other
+    int TargetFPS;
+
     PhysicsConfig physics;
     InteractionConfig interaction;
 
     // Default Constructor
     Config()
-        : Config(Vector2{ 0, 9.81f * 100 }, 0.00002f, 0.47f, true)
+        : Config(60, Vector2{0, 9.81f * 100 }, 0.00002f, 0.47f, true)
     {
     }
 
     // Parameterized Constructor
     // Matches the arguments of the sub-constructors
-    Config(Vector2 G, float AirDensity, float DragCoef, bool CanDrag)
-        : physics(G, AirDensity, DragCoef), // Call PhysicsConfig constructor
-        interaction(CanDrag)// Call InteractionConfig constructor
+    Config(int targetFPS, Vector2 G, float AirDensity, float DragCoef, bool CanDrag)
+
+        : TargetFPS(targetFPS < 1? 1 : targetFPS), // make sure that target fps isnt less than 1
+          physics(G, AirDensity, DragCoef), // Call PhysicsConfig constructor
+          interaction(CanDrag)// Call InteractionConfig constructor
     {
     }
 };

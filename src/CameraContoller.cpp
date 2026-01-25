@@ -1,4 +1,4 @@
-#include "main.h"
+#include "CameraController.h"
 #include "raymath.h"
 
 void CameraMove(Camera2D& mainCamera)

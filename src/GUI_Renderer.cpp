@@ -5,7 +5,6 @@
 
 
 void GUI_Renderer::Render_GUI() {
-
     // draw fps at the top left corner of the screen
     DrawFPS(RelativeToScreen({ 0.02f, 0 }).x, RelativeToScreen({ 0, 0.01 }).y);
 
@@ -35,6 +34,22 @@ Rectangle GUI_Renderer::SetBoundsRelative(float xPos, float yPos, float length, 
     childRect.height = height * Parent.height;
 
     return childRect;
+}
+
+
+void GUI_Renderer::DrawFixedBackground(Texture2D background, int screenWidth, int screenHeight) {
+    // Calculate scale to fill screen while maintaining aspect ratio
+    float scaleX = (float)screenWidth / background.width;
+    float scaleY = (float)screenHeight / background.height;
+    float scale = (scaleX > scaleY) ? scaleX : scaleY; // Use larger scale to cover entire screen
+
+    // Center the background on screen
+    Vector2 position = {
+        (screenWidth - (background.width * scale)) / 2.0f,
+        (screenHeight - (background.height * scale)) / 2.0f
+    };
+
+    DrawTextureEx(background, position, 0.0f, scale, WHITE);
 }
 
 // is the panel minimized or not
@@ -81,9 +96,9 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
         Rectangle labelIsAnchored3 = SetBoundsRelative(0.13, 0.11, 0.9, 0.02, PanelBounds);
         GuiLabel(labelIsAnchored3, "Anchor or Free the node");
-      //--------------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------------
 
-        //change the font size back to the rest of the panel
+          //change the font size back to the rest of the panel
         GuiSetStyle(DEFAULT, TEXT_SIZE, RelativeToScreen(Vector2{ 0,0.035 }).y);
 
         //allow gravity X changes via sliders and buttons to reset values
@@ -126,9 +141,9 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         if (GuiButton(checkBoxDefault, "default")) {
             *gravityY = defaultGravityY;
         }
-//-------------------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------------------
 
-        //allow air density changes
+                //allow air density changes
         Rectangle labelBounds3 = SetBoundsRelative(0.25, 0.56, 0.5, 0.02, PanelBounds);
         GuiLabel(labelBounds3, "Change Air Density");
 
@@ -146,5 +161,109 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         if (GuiButton(checkBoxDefaultAirDensity, "default")) {
             *airDesity = defaultAirDesity;
         }
+
+
+        //----------------------------------------------------------------------------------------------------------------
+
+            // change FPS mid simulation
+
+        static bool FPSeditMode = false;
+        static int targetFPS = config.TargetFPS;
+        Rectangle ChangeFPSBounds = SetBoundsRelative(0.3, 0.71, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(ChangeFPSBounds, "Target FPS", &targetFPS, 1, 999, FPSeditMode)) {
+
+            FPSeditMode = true;
+            targetFPS < 10 ? targetFPS : 1;
+        }
+        if (IsKeyPressed(KEY_ENTER) && FPSeditMode == true) {
+            FPSeditMode = false;
+            config.TargetFPS = targetFPS;
+            SetTargetFPS(config.TargetFPS);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------
+
+        static bool PosXeditMode = false;
+        static int NewPosX = 0;
+        Rectangle NewRopeX = SetBoundsRelative(0.57, 0.77, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(NewRopeX, "X ", &NewPosX, -10000, 10000, PosXeditMode)) {
+
+            PosXeditMode = true;
+        }
+
+        if (IsKeyPressed(KEY_ENTER) && PosXeditMode == true) {
+            PosXeditMode = false;
+        }
+
+
+
+        static bool PosYeditMode = false;
+        static int NewPosY = 0;
+        Rectangle NewRopeY = SetBoundsRelative(0.8, 0.77, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(NewRopeY, "Y ", &NewPosY, -10000, 10000, PosYeditMode)) {
+
+            PosYeditMode = true;
+        }
+
+        if (IsKeyPressed(KEY_ENTER) && PosYeditMode == true) {
+            PosYeditMode = false;
+        }
+
+
+
+        static bool NodesEditMode = false;
+        static int NewNodesAmount = 1;
+        Rectangle NodeAmount = SetBoundsRelative(0.34, 0.77, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(NodeAmount, "Node amount ", &NewNodesAmount, 1, 100000, NodesEditMode)) {
+
+            NodesEditMode = true;
+        }
+
+        if (IsKeyPressed(KEY_ENTER) && NodesEditMode == true) {
+            NodesEditMode = false;
+        }
+
+
+
+        static bool NodesLengthEditMode = false;
+        static int NewNodesLength = 1;
+        Rectangle NodeLength = SetBoundsRelative(0.46, 0.83, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(NodeLength, "Connection Length ", &NewNodesLength, 1, 100000, NodesLengthEditMode)) {
+
+            NodesLengthEditMode = true;
+        }
+
+        if (IsKeyPressed(KEY_ENTER) && NodesLengthEditMode == true) {
+            NodesLengthEditMode = false;
+        }
+
+
+
+        static bool NodesRadiusEditMode = false;
+        static int NewNodesRadius = 1;
+        Rectangle NodeRadius = SetBoundsRelative(0.31, 0.89, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(NodeRadius, "Node radius ", &NewNodesRadius, 1, 100000, NodesRadiusEditMode)) {
+
+            NodesRadiusEditMode = true;
+        }
+
+        if (IsKeyPressed(KEY_ENTER) && NodesRadiusEditMode == true) {
+            NodesRadiusEditMode = false;
+        }
+
+
+        Rectangle createNewRope = SetBoundsRelative(0.55, 0.9, 0.4, 0.05, PanelBounds);
+
+        if (GuiButton(createNewRope, "create Rope")) {
+
+            Solver.SetupRope({ (float)NewPosX, (float)NewPosY }, true, NewNodesAmount, NewNodesLength, NewNodesRadius);
+        }
+
     }
 }

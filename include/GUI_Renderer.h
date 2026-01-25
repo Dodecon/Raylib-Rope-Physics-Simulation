@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "raygui.h"
 #include "raymath.h"
+#include "RopePhysicsSolver.h"
 #include "PhysicsConfig.h"
 
 class GUI_Renderer
@@ -11,11 +12,13 @@ public:
 /// render all elements
 /// </summary>
     void Render_GUI();
+    void DrawFixedBackground(Texture2D background, int screenWidth, int screenHeight);
 
     Config& config;
+    RopePhysicsSolver& Solver;
     bool isMinimized = false;
 
-    GUI_Renderer(Config& CFG) : config(CFG) {};   //constructor
+    GUI_Renderer(RopePhysicsSolver& SLV, Config& CFG) : Solver(SLV), config(CFG) {};   //constructor
 private:
 
 /// <summary>

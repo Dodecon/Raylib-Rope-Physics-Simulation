@@ -2,7 +2,7 @@
 #include "raylib.h"
 #include <vector>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
-#include "main.h"
+#include "CameraController.h"
 #include "RopeNode.h"
 #include "RopePhysicsSolver.h"
 #include "PhysicsConfig.h"
@@ -12,10 +12,8 @@
 
 int main()
 {
-	int TargetFPS = 60;
-
-	int DefaultResolutionX = 1200;
-	int DefaultResolutionY = 700;
+	int DefaultResolutionX = 1820;
+	int DefaultResolutionY = 930;
 
 
 	Camera2D mainCamera = { 0 };	// Camera setup
@@ -24,7 +22,7 @@ int main()
 	Config DefaultConfig;	//set up config, physics, GUI rrendering
 	InteractionConfig DefaultInteractionCFG;
 	RopePhysicsSolver DefaultSolver(DefaultConfig);
-	GUI_Renderer GUI(DefaultConfig);
+	GUI_Renderer GUI(DefaultSolver, DefaultConfig);
 
 
 	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 9, 40, 10);		//creating 3 example ropes
@@ -37,7 +35,7 @@ int main()
 	//SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	SetTargetFPS(TargetFPS);
+	SetTargetFPS(DefaultConfig.TargetFPS);
 
 	// Enable 4x MSAA anti-aliasing
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -55,7 +53,7 @@ int main()
 
 
 	// game loop
-	while (!WindowShouldClose())		// run the loop until the user presses ESCAPE or presses the Close button on the window
+	while (!WindowShouldClose())  // run the loop until the user presses ESCAPE or presses the Close button on the window
 	{
 		CameraMove(mainCamera);
 
@@ -64,16 +62,13 @@ int main()
 		// Setup the back buffer for drawing (clear color and depth buffers)
 		ClearBackground(RAYWHITE);
 
-
-		//draw the static background
-		DrawFixedBackground(background, GetScreenWidth(), GetScreenHeight());
-
+		GUI.DrawFixedBackground(background, GetScreenWidth(), GetScreenHeight());
 
 		BeginMode2D(mainCamera); // start world space drawing
 
-		double frameTime = 1.0 / TargetFPS;
+		double frameTime = 1.0 / DefaultConfig.TargetFPS;
 
-		DefaultSolver.HandleRopes(mainCamera,6, 4, frameTime); //render all ropes and calculate physics
+		DefaultSolver.HandleRopes(mainCamera,8, 3, frameTime); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
@@ -89,20 +84,4 @@ int main()
 	CloseWindow();
 
 	return 0;
-}
-
-
-void DrawFixedBackground(Texture2D background, int screenWidth, int screenHeight) {
-	// Calculate scale to fill screen while maintaining aspect ratio
-	float scaleX = (float)screenWidth / background.width;
-	float scaleY = (float)screenHeight / background.height;
-	float scale = (scaleX > scaleY) ? scaleX : scaleY; // Use larger scale to cover entire screen
-
-	// Center the background on screen
-	Vector2 position = {
-		(screenWidth - (background.width * scale)) / 2.0f,
-		(screenHeight - (background.height * scale)) / 2.0f
-	};
-
-	DrawTextureEx(background, position, 0.0f, scale, WHITE);
 }
