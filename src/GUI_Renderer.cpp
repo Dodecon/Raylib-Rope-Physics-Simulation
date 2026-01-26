@@ -165,8 +165,12 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
         //----------------------------------------------------------------------------------------------------------------
 
-            // change FPS mid simulation
+            // change FPS mid simulation and switch an ability for the rope to be able to compress onto itself
 
+        //dont allow interactions with other buttons if one is currently pressed
+        static bool wasButtonPressed = false;
+
+        //create a value box
         static bool FPSeditMode = false;
         static int targetFPS = config.TargetFPS;
         Rectangle ChangeFPSBounds = SetBoundsRelative(0.3, 0.71, 0.15, 0.05, PanelBounds);
@@ -174,42 +178,72 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         if (GuiValueBox(ChangeFPSBounds, "Target FPS", &targetFPS, 1, 999, FPSeditMode)) {
 
             FPSeditMode = true;
+            wasButtonPressed = true;
             targetFPS < 10 ? targetFPS : 1;
         }
-        if (IsKeyPressed(KEY_ENTER) && FPSeditMode == true) {
+        if (IsKeyPressed(KEY_ENTER) && FPSeditMode == true) 
+        {
+            //pass the new target fps into config and change target fps
             FPSeditMode = false;
+            wasButtonPressed = false;
             config.TargetFPS = targetFPS;
             SetTargetFPS(config.TargetFPS);
         }
 
+
+        static bool SwitchCompressionEditMode = false;
+        static int NewRigid = false;
+        Rectangle NewRigidBounds = SetBoundsRelative(0.8, 0.71, 0.15, 0.05, PanelBounds);
+
+        if (GuiValueBox(NewRigidBounds, "Rigid ropes ", &NewRigid, 0, 1, SwitchCompressionEditMode) && wasButtonPressed == false) {
+
+            SwitchCompressionEditMode = true;
+            wasButtonPressed = true;
+        }
+        // only change the value after enter is pressed
+        if (IsKeyPressed(KEY_ENTER) && SwitchCompressionEditMode == true) {
+            SwitchCompressionEditMode = false;
+            wasButtonPressed = false;
+
+            config.physics.areRopesRigid = (bool)NewRigid;
+        }
+
+
         //-----------------------------------------------------------------------------------------------------------------
 
+        // Create a new rope
+
+        // X position for the new rope
         static bool PosXeditMode = false;
         static int NewPosX = 0;
         Rectangle NewRopeX = SetBoundsRelative(0.57, 0.77, 0.15, 0.05, PanelBounds);
 
-        if (GuiValueBox(NewRopeX, "X ", &NewPosX, -10000, 10000, PosXeditMode)) {
+        if (GuiValueBox(NewRopeX, "X ", &NewPosX, -10000, 10000, PosXeditMode) && wasButtonPressed == false) {
 
             PosXeditMode = true;
+            wasButtonPressed = true;
         }
-
+        // only change the value after enter is pressed
         if (IsKeyPressed(KEY_ENTER) && PosXeditMode == true) {
             PosXeditMode = false;
+            wasButtonPressed = false;
         }
 
 
-
+        // Y position for the new rope
         static bool PosYeditMode = false;
         static int NewPosY = 0;
         Rectangle NewRopeY = SetBoundsRelative(0.8, 0.77, 0.15, 0.05, PanelBounds);
 
-        if (GuiValueBox(NewRopeY, "Y ", &NewPosY, -10000, 10000, PosYeditMode)) {
+        if (GuiValueBox(NewRopeY, "Y ", &NewPosY, -10000, 10000, PosYeditMode) && wasButtonPressed == false) {
 
             PosYeditMode = true;
+            wasButtonPressed = true;
         }
 
         if (IsKeyPressed(KEY_ENTER) && PosYeditMode == true) {
             PosYeditMode = false;
+            wasButtonPressed = false;
         }
 
 
@@ -218,13 +252,15 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         static int NewNodesAmount = 1;
         Rectangle NodeAmount = SetBoundsRelative(0.34, 0.77, 0.15, 0.05, PanelBounds);
 
-        if (GuiValueBox(NodeAmount, "Node amount ", &NewNodesAmount, 1, 100000, NodesEditMode)) {
+        if (GuiValueBox(NodeAmount, "Node amount ", &NewNodesAmount, 1, 100000, NodesEditMode) && wasButtonPressed == false) {
 
             NodesEditMode = true;
+            wasButtonPressed = true;
         }
 
         if (IsKeyPressed(KEY_ENTER) && NodesEditMode == true) {
             NodesEditMode = false;
+            wasButtonPressed = false;
         }
 
 
@@ -233,13 +269,16 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         static int NewNodesLength = 1;
         Rectangle NodeLength = SetBoundsRelative(0.46, 0.83, 0.15, 0.05, PanelBounds);
 
-        if (GuiValueBox(NodeLength, "Connection Length ", &NewNodesLength, 1, 100000, NodesLengthEditMode)) {
+        if (GuiValueBox(NodeLength, "Connection Length ", &NewNodesLength, 1, 100000, NodesLengthEditMode) && wasButtonPressed == false) {
 
             NodesLengthEditMode = true;
+            wasButtonPressed = true;
         }
 
         if (IsKeyPressed(KEY_ENTER) && NodesLengthEditMode == true) {
+
             NodesLengthEditMode = false;
+            wasButtonPressed = false;
         }
 
 
@@ -248,13 +287,16 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         static int NewNodesRadius = 1;
         Rectangle NodeRadius = SetBoundsRelative(0.31, 0.89, 0.15, 0.05, PanelBounds);
 
-        if (GuiValueBox(NodeRadius, "Node radius ", &NewNodesRadius, 1, 100000, NodesRadiusEditMode)) {
+        if (GuiValueBox(NodeRadius, "Node radius ", &NewNodesRadius, 1, 100000, NodesRadiusEditMode) && wasButtonPressed == false) {
 
             NodesRadiusEditMode = true;
+            wasButtonPressed = true;
         }
 
         if (IsKeyPressed(KEY_ENTER) && NodesRadiusEditMode == true) {
+
             NodesRadiusEditMode = false;
+            wasButtonPressed = false;
         }
 
 

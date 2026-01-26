@@ -18,6 +18,9 @@ int main()
 
 	Camera2D mainCamera = { 0 };	// Camera setup
 	mainCamera.zoom = 1;
+	mainCamera.target = Vector2{ (float)DefaultResolutionX / 2 , (float)DefaultResolutionY / 2 };
+	mainCamera.offset = Vector2{ (float)DefaultResolutionX / 2,(float)DefaultResolutionY / 2 };
+
 
 	Config DefaultConfig;	//set up config, physics, GUI rrendering
 	InteractionConfig DefaultInteractionCFG;
@@ -68,7 +71,7 @@ int main()
 
 		double frameTime = 1.0 / DefaultConfig.TargetFPS;
 
-		DefaultSolver.HandleRopes(mainCamera,8, 3, frameTime); //render all ropes and calculate physics
+		DefaultSolver.HandleRopes(mainCamera, 6, 4, frameTime); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing
