@@ -53,6 +53,8 @@ struct InteractionConfig
     {}
 };
 
+
+
 struct Config
 {
     //other
@@ -63,7 +65,7 @@ struct Config
 
     // Default Constructor
     Config()
-        : Config(60, Vector2{0, 9.81f * 100 }, 0.00002f, 0.47f, false, false)
+        : Config(60, Vector2{0, 9.81f * 100 }, 0.00003f, 0.47f, false, false)
     {
     }
 

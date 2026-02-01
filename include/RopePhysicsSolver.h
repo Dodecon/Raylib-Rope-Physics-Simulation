@@ -1,8 +1,13 @@
 #pragma once
+// Safety check for missing constants
+#ifndef RL_TRIANGLE_STRIP
+	#define RL_TRIANGLE_STRIP 0x0005
+#endif
 #include <vector>
+#include <omp.h>
 #include "raylib.h"
 #include "raymath.h"
-#include "RopeNode.h"
+#include "RopeRenderer.h"
 #include "Rope.h"
 #include "PhysicsConfig.h"
 
@@ -16,10 +21,10 @@ public:
 	~RopePhysicsSolver() = default;
 
 	// add acceleration to nodes as a force
-	void Accelerate(RopeNode& ropenode, const Vector2 acceleration);
+	void Accelerate(Rope& rope, int NodeIndex, const Vector2 acceleration);
 
 	// set up the rope
-	Rope& SetupRope(const Vector2 firstNodePos, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadius);
+	Rope& SetupRope(const Vector2 firstNodePos, const Vector2 initialAcceleration, bool isFirstNodeStatic, int nodeAmount, float RopeLengthForEachNode, float nodeRadius);
 	//update a specific rope
 	void UpdateRope(Rope& rope, Camera2D& camera, const int substeps, const int iterations, const double deltaTime);
 	//update all ropes
@@ -33,18 +38,7 @@ public:
 
 private:
 
-	void UpdateRopeNodesPositions(Rope& ropenodes, const double deltaTime);
-	void ApplyForces(Rope& ropenodes);
-	void ApplyConstraints(Rope& ropenodes, const int iterations);
+	void UpdateRopeNodesPositions(Rope& rope, const double deltaTime);
+	void ApplyForces(Rope& rope);
+	void ApplyConstraints(Rope& rope, const int iterations);
 };
-
-class RopeRenderer
-{
-public:
-	RopeRenderer() = default;
-	~RopeRenderer() = default;
-
-	static void RenderRope(const Rope& rope);
-
-};
-

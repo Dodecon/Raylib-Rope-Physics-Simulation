@@ -3,7 +3,6 @@
 #include <vector>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 #include "CameraController.h"
-#include "RopeNode.h"
 #include "RopePhysicsSolver.h"
 #include "PhysicsConfig.h"
 
@@ -28,9 +27,9 @@ int main()
 	GUI_Renderer GUI(DefaultSolver, DefaultConfig);
 
 
-	Rope Rope1 = DefaultSolver.SetupRope(Vector2{200,100}, true, 9, 40, 10);		//creating 3 example ropes
-	Rope Rope2 = DefaultSolver.SetupRope(Vector2{400,100}, true, 27, 22, 7);
-	Rope Rope3 = DefaultSolver.SetupRope(Vector2{600,100}, true, 70, 8, 5);
+	DefaultSolver.SetupRope(Vector2{200,100}, Vector2{0,0}, true, 3333, 40, 10);		//creating 3 example ropes
+	DefaultSolver.SetupRope(Vector2{400,100}, Vector2{ 0,0 },true, 3333, 22, 7);
+	DefaultSolver.SetupRope(Vector2{600,100}, Vector2{ 0,0 }, true, 3333, 8, 5);
 
 
 	// Tell the window to use vsync and work on high DPI displays
@@ -71,8 +70,7 @@ int main()
 
 		double frameTime = 1.0 / DefaultConfig.TargetFPS;
 
-		DefaultSolver.HandleRopes(mainCamera, 6, 4, frameTime); //render all ropes and calculate physics
-
+		DefaultSolver.HandleRopes(mainCamera, 8, 3, frameTime); //render all ropes and calculate physics
 
 		EndMode2D(); // end world space drawing
 

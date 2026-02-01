@@ -304,7 +304,7 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
 
         if (GuiButton(createNewRope, "create Rope")) {
 
-            Solver.SetupRope({ (float)NewPosX, (float)NewPosY }, true, NewNodesAmount, NewNodesLength, NewNodesRadius);
+            Solver.SetupRope({ (float)NewPosX, (float)NewPosY }, Vector2{0,0}, 1, NewNodesAmount, NewNodesLength, NewNodesRadius);
         }
 
     }
