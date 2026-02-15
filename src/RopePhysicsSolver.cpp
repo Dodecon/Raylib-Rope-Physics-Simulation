@@ -1,4 +1,6 @@
 ﻿#include "RopePhysicsSolver.h"
+#include<iostream>
+#include <chrono>
 
 //adds acceleration that resets every frame to a node
 void RopePhysicsSolver::Accelerate(RopeNode& ropenode, const Vector2 acceleration) {
@@ -135,7 +137,6 @@ Rope& RopePhysicsSolver::SetupRope(const Vector2 firstNodePos, bool isFirstNodeA
 		AllNodes.emplace_back(firstNodePos + offset, Vector2{ 0,0 }, nodeRadiusForEach, RopeLengthForEach, false, currentRopeID);
 	}
 
-
 	return AllRopes.back();
 }
 
@@ -174,7 +175,7 @@ void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& nodes, Rope& rop
 					nodeA.Position += correction;
 					nodeB.Position -= correction;
 
-					// prevent acces momentum build up
+					// prevent access momentum build up
 					nodeA.OldPosition += correction * correctionCoef;
 					nodeB.OldPosition -= correction * correctionCoef;
 
@@ -202,10 +203,10 @@ void RopePhysicsSolver::ApplyConstraints(std::vector<RopeNode>& nodes, Rope& rop
 //calculates physics and renders all the ropes in one command
 void RopePhysicsSolver::HandleRopes(Camera2D& camera, const int substeps, const int iterations, const double deltaTime) {
 
-
+		// Update physics
 		UpdateRopes(camera, substeps, iterations, deltaTime);
 
-		//need to change to use multi-threading
+		//render all ropes
 		for (int i = 0; i < AllRopes.size(); i++) {
 
 			Rope& thisRope = AllRopes[i];

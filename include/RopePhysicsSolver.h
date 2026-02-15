@@ -12,10 +12,14 @@ class RopePhysicsSolver
 {
 public:
 
+	// vector to store all nodes of all ropes in one buffer
+	// and a vector that stores an index where a specific ropes starts at AllNodes and other thats needed on a per-rope basis
 	std::vector<Rope> AllRopes;
 	std::vector<RopeNode> AllNodes;
 
+	// config to get the physics and interaction data from
 	Config& config;
+	// a threadpool used for multithreading
 	Threadpool& threadpool;
 
 	RopePhysicsSolver(Config& CFG, Threadpool& tp) : config(CFG), threadpool(tp) {}

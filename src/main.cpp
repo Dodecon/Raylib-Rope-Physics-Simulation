@@ -74,7 +74,7 @@ int main()
 
 		double frameTime = 1.0 / DefaultConfig.TargetFPS;
 
-		DefaultSolver.HandleRopes(mainCamera, 6, 4, frameTime); //render all ropes and calculate physics
+		DefaultSolver.HandleRopes(mainCamera, 6, 5, frameTime); //render all ropes and calculate physics
 
 
 		EndMode2D(); // end world space drawing

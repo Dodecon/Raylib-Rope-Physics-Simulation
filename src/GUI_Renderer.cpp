@@ -175,7 +175,7 @@ void GUI_Renderer::RenderPanel(float xPos, float yPos, float length, float heigh
         static int targetFPS = config.TargetFPS;
         Rectangle ChangeFPSBounds = SetBoundsRelative(0.3, 0.71, 0.15, 0.05, PanelBounds);
 
-        if (GuiValueBox(ChangeFPSBounds, "Target FPS", &targetFPS, 1, 999, FPSeditMode)) {
+        if (GuiValueBox(ChangeFPSBounds, "Target FPS", &targetFPS, 1, 999, FPSeditMode) && wasButtonPressed == false) {
 
             FPSeditMode = true;
             wasButtonPressed = true;

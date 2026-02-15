@@ -31,7 +31,7 @@ void RopeRenderer::RenderRopes(Camera2D& camera, Rope& rope, std::vector<RopeNod
 
 		return (nodeScreenPos.x + nodeRadiusscreen >= 0 && nodeScreenPos.x - nodeRadiusscreen <= GetScreenWidth() &&
 			nodeScreenPos.y + nodeRadiusscreen >= 0 && nodeScreenPos.y - nodeRadiusscreen <= GetScreenHeight());
-	};
+		};
 
 	// all visible nodes
 	std::vector<Vector2> batch;
